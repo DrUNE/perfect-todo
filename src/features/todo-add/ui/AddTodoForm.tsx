@@ -1,31 +1,49 @@
-import { Button, Input } from 'antd';
-import { useState, type FormEvent } from 'react';
-import { addTodo } from '../model';
+import { Input, type InputRef } from 'antd';
+import { useEffect, useRef, type FormEvent, type KeyboardEvent } from 'react';
 import styles from './AddTodoForm.module.css';
 
-export function AddTodoForm() {
-  const [title, setTitle] = useState('');
+type AddTodoFormProps = {
+  value: string;
+  isEditing: boolean;
+  onChange: (value: string) => void;
+  onSubmit: () => void;
+  onCancelEdit: () => void;
+};
+
+export function AddTodoForm({ value, isEditing, onChange, onSubmit, onCancelEdit }: AddTodoFormProps) {
+  const inputRef = useRef<InputRef>(null);
+
+  useEffect(() => {
+    if (isEditing) {
+      inputRef.current?.focus({ cursor: 'all' });
+    }
+  }, [isEditing]);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!title.trim()) {
-      return;
+    if (value.trim()) {
+      onSubmit();
     }
+  };
 
-    addTodo(title);
-    setTitle('');
+  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Escape' && isEditing) {
+      event.preventDefault();
+      onCancelEdit();
+    }
   };
 
   return (
     <form className={styles.form} onSubmit={handleSubmit}>
       <Input
+        ref={inputRef}
         aria-label="Название задачи"
-        placeholder="Новая задача"
-        value={title}
-        onChange={(event) => setTitle(event.target.value)}
+        placeholder={isEditing ? 'Enter для сохранения, Esc для отмены' : 'Новая задача, Enter для добавления'}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        onKeyDown={handleKeyDown}
       />
-      <Button htmlType="submit">Add TODO</Button>
     </form>
   );
 }
