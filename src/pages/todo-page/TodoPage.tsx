@@ -5,7 +5,9 @@ import { addTodo } from '@/features/todo-add/model';
 import { AddTodoForm } from '@/features/todo-add/ui';
 import { ClearCompletedButton } from '@/features/todo-clear-completed/ui';
 import { editTodo } from '@/features/todo-edit/model';
+import { ThemeSwitcher } from '@/features/theme-switch/ui';
 import { toggleTodo } from '@/features/todo-toggle/model';
+import { css } from '@styled-system/css';
 import { flex } from '@styled-system/patterns';
 
 export function TodoPage() {
@@ -46,6 +48,9 @@ export function TodoPage() {
         gap: '16px',
       })}
     >
+      <div className={css({ position: 'absolute', top: '16px', right: '16px' })}>
+        <ThemeSwitcher />
+      </div>
       <AddTodoForm
         value={title}
         isEditing={editingTodo !== null}

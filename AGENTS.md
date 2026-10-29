@@ -17,6 +17,7 @@
 - `src/features/todo-toggle/model/` — сценарий переключения состояния задачи.
 - `src/features/todo-edit/model/` — сценарий обновления названия задачи; состояние редактирования и значение общего input управляются страницей.
 - `src/features/todo-clear-completed/` — сценарий и кнопка удаления всех завершённых задач; кнопка скрыта, если завершённых задач нет.
+- `src/features/theme-switch/` — трёхпозиционный переключатель темы (светлая/браузер/тёмная). Выбор сохраняется в Zustand persist/localStorage, системная тема отслеживается через `matchMedia`, Ant Design использует `defaultAlgorithm`/`darkAlgorithm`, а `html[data-theme]` управляет глобальными цветами Panda.
 - `src/entities/todo/model/` — типы и Zustand-store задач.
 - `src/entities/todo/ui/TodoItem/` — отображение отдельной задачи; UI получает действие через callback и не зависит от feature.
 - `panda.config.ts` — presets, preflight и глобальные стили Panda; `src/index.css` содержит только порядок cascade layers. CSS Modules удалены, локальные стили описываются через `@styled-system/css` и `@styled-system/patterns`.
