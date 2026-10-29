@@ -1,6 +1,6 @@
 import { Input, type InputRef } from 'antd';
 import { useEffect, useRef, type FormEvent, type KeyboardEvent } from 'react';
-import styles from './AddTodoForm.module.css';
+import { flex } from '@styled-system/patterns';
 
 type AddTodoFormProps = {
   value: string;
@@ -41,7 +41,7 @@ export function AddTodoForm({
   };
 
   return (
-    <form className={styles.form} onSubmit={handleSubmit}>
+    <form className={flex({ width: '100%', gap: '8px' })} onSubmit={handleSubmit}>
       <Input
         ref={inputRef}
         aria-label="Название задачи"

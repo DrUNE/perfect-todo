@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "prepare": "panda codegen",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
@@ -24,6 +25,10 @@
     "zustand": "^5.0.16"
   },
   "devDependencies": {
+    "@pandacss/dev": "^2.4.0",
+    "@pandacss/preset-base": "^2.4.0",
+    "@pandacss/preset-panda": "^2.4.0",
+    "@pandacss/vite": "^2.4.0",
     "@playwright/test": "^1.64.1",
     "@types/node": "^24.19.2",
     "@types/react": "^19.3.0",

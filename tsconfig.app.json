@@ -5,7 +5,8 @@
     "lib": ["ES2023", "DOM"],
     "module": "esnext",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@styled-system/*": ["./styled-system/*"]
     },
     "types": ["vite/client"],
     "allowArbitraryExtensions": true,
@@ -25,5 +26,5 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"]
+  "include": ["src", "styled-system"]
 }

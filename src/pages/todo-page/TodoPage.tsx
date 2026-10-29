@@ -6,7 +6,7 @@ import { AddTodoForm } from '@/features/todo-add/ui';
 import { ClearCompletedButton } from '@/features/todo-clear-completed/ui';
 import { editTodo } from '@/features/todo-edit/model';
 import { toggleTodo } from '@/features/todo-toggle/model';
-import styles from './TodoPage.module.css';
+import { flex } from '@styled-system/patterns';
 
 export function TodoPage() {
   const todoList = useTodoList((state) => state.todoList);
@@ -36,7 +36,16 @@ export function TodoPage() {
   };
 
   return (
-    <main className={styles.wrapper}>
+    <main
+      className={flex({
+        direction: 'column',
+        justify: 'center',
+        width: 'min(calc(100% - 32px), 400px)',
+        minHeight: '100vh',
+        marginInline: 'auto',
+        gap: '16px',
+      })}
+    >
       <AddTodoForm
         value={title}
         isEditing={editingTodo !== null}
@@ -45,7 +54,7 @@ export function TodoPage() {
         onCancelEdit={cancelEditing}
       />
       <ClearCompletedButton />
-      <div className={styles.list}>
+      <div className={flex({ direction: 'column', gap: '16px' })}>
         {todoList.map((todo) => (
           <TodoItem
             key={todo.id}
