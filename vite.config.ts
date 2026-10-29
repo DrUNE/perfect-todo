@@ -5,8 +5,11 @@ import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
 // https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ command }) => ({
   plugins: [pandacss(), react()],
+  css: {
+    devSourcemap: command === 'serve',
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
@@ -16,4 +19,4 @@ export default defineConfig({
   test: {
     include: ['src/**/*.test.{ts,tsx}'],
   },
-});
+}));

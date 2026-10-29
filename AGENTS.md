@@ -45,7 +45,7 @@ npm run preview           # просмотр production build
 - После изменений кода запускать как минимум `npm run build`, `npm run lint` и `npm run test:run`, а также `npm run fmt:check` для проверки форматирования.
 - Основные правила Oxfmt находятся в `.oxfmtrc.json`: одинарные кавычки и предпочтительная ширина строки `printWidth: 120`.
 - Не форматировать весь репозиторий ради локальной задачи, если это создаёт unrelated changes. Для точечного форматирования использовать локальный `oxfmt` с конкретными путями.
-- Полный `fmt:check` сообщает о проблемах в `tsconfig.json`, `src/index.css`, `src/entities/todo/model/index.ts`, `src/entities/todo/model/todoStore.ts` и `src/features/todo-toggle/model/toggleTodo.ts`. Не перезаписывать пользовательские изменения автоматическим форматированием без запроса; обновлять эту заметку после приведения файлов к текущим правилам.
+- `vite.config.ts` включает CSS sourcemaps только для dev-сервера через `css.devSourcemap`; исходный код в dev-режиме Vite сопровождается sourcemaps по умолчанию. Production sourcemaps отдельно не включены.
 
 ## Архитектура по мере роста
 
