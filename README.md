@@ -79,8 +79,8 @@ src/
     model/                # типы и Zustand-store
     ui/TodoItem/          # отображение одной задачи
   main.tsx                # точка входа
-  index.css               # порядок Panda cascade layers
-panda.config.ts           # preflight и глобальные стили Panda
+  index.css               # Ant Design reset и порядок cascade layers
+panda.config.ts           # presets и глобальные стили Panda
 vite.config.ts            # Vite, Panda, Vitest и алиасы
 playwright.config.ts      # конфигурация E2E-тестов
 e2e/                      # пользовательские сценарии Playwright
@@ -89,7 +89,7 @@ styled-system/            # сгенерированные Panda helpers и ти
 
 Импорты исходного кода выполняются через алиас `@/`, например `@/entities/todo/model`. Сгенерированные Panda helpers импортируются через `@styled-system/...`.
 
-Стили пишутся через `css`/`cx` и patterns Panda, а не через CSS Modules. Глобальные стили находятся в `panda.config.ts`.
+Стили пишутся через `css`/`cx` и patterns Panda, а не через CSS Modules. Глобальные стили находятся в `panda.config.ts`. Panda Preflight отключён, базовый reset подключается из `antd/dist/reset.css` в слое `reset` в `src/index.css`.
 
 ## Команды
 
@@ -119,7 +119,7 @@ styled-system/            # сгенерированные Panda helpers и ти
 
 - `utilities` — стили из `css()` и patterns;
 - `base` — глобальные стили из `panda.config.ts`;
-- `reset` — Panda preflight;
+- `reset` — базовый reset Ant Design;
 - `tokens` — design tokens.
 
 Sourcemap ведёт к **сгенерированному CSS**, а не к конкретному объекту `css({...})` в TSX. Чтобы найти исходный стиль, ищи в проекте соответствующее свойство или значение, например `line-through` или `gap: '16px'`.

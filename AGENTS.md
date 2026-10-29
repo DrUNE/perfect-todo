@@ -17,10 +17,10 @@
 - `src/features/todo-toggle/model/` — сценарий переключения состояния задачи.
 - `src/features/todo-edit/model/` — сценарий обновления названия задачи; состояние редактирования и значение общего input управляются страницей.
 - `src/features/todo-clear-completed/` — сценарий и кнопка удаления всех завершённых задач; кнопка скрыта, если завершённых задач нет.
-- `src/features/theme-switch/` — трёхпозиционный переключатель темы (светлая/браузер/тёмная). Выбор сохраняется в Zustand persist/localStorage, системная тема отслеживается через `matchMedia`, Ant Design использует `defaultAlgorithm`/`darkAlgorithm`, а `html[data-theme]` управляет глобальными цветами Panda.
+- `src/features/theme-switch/` — трёхпозиционный переключатель темы (светлая/браузер/тёмная). Выбор сохраняется в Zustand persist/localStorage, системная тема отслеживается через `matchMedia`, Ant Design использует `defaultAlgorithm`/`darkAlgorithm`. Фон приложения задаётся из токена `colorBgLayout` через `theme.useToken()`, а `html[data-theme]` управляет остальными глобальными цветами Panda.
 - `src/entities/todo/model/` — типы и Zustand-store задач.
 - `src/entities/todo/ui/TodoItem/` — отображение отдельной задачи; UI получает действие через callback и не зависит от feature.
-- `panda.config.ts` — presets, preflight и глобальные стили Panda; `src/index.css` содержит только порядок cascade layers. CSS Modules удалены, локальные стили описываются через `@styled-system/css` и `@styled-system/patterns`.
+- `panda.config.ts` — presets и глобальные стили Panda; Panda Preflight отключён. `src/index.css` подключает `antd/dist/reset.css` в слой `reset` и задаёт порядок остальных cascade layers. CSS Modules удалены, локальные стили описываются через `@styled-system/css` и `@styled-system/patterns`.
 - `public/` — статические файлы, доступные по URL от корня; сейчас там только `favicon.svg`.
 - Unit-тесты запускаются через Vitest 5 в Node-окружении и используют общий `vite.config.ts`, включая алиас `@/`. Примеры тестов находятся рядом с моделями в `entities/todo/model` и `features/todo-*/model`.
 - E2E-тесты находятся в `e2e/` и запускаются через Playwright в Chromium. `playwright.config.ts` автоматически поднимает Vite на `127.0.0.1:5173`; браузеры устанавливаются локально в `node_modules` через `PLAYWRIGHT_BROWSERS_PATH=0`, поэтому после `npm ci` нужно повторить `npm run test:e2e:install`.
@@ -101,7 +101,7 @@ src/
 ## UI, стили и доступность
 
 - Стили писать только через Panda CSS: `css`/`cx` из `@styled-system/css` и `flex` или другие patterns из `@styled-system/patterns`. Не возвращать CSS Modules и inline-объекты `style` без необходимости.
-- Глобальные стили и preflight настраивать в `panda.config.ts`; `src/index.css` использовать только для объявления порядка cascade layers. Каталог `styled-system/` генерируется через `npm run prepare` и не редактируется вручную, он добавлен в `.gitignore`.
+- Глобальные стили настраивать в `panda.config.ts`; Panda Preflight не включать, базовый reset предоставляет `antd/dist/reset.css`. `src/index.css` использовать только для объявления порядка cascade layers и подключения reset в слой `reset`, чтобы он не перекрывал стили Ant Design и Panda. Каталог `styled-system/` генерируется через `npm run prepare` и не редактируется вручную, он добавлен в `.gitignore`.
 - Не дублировать готовые возможности Ant Design собственными сложными контролами. При внедрении Ant Design тему и общие настройки задавать централизованно через provider.
 - Интерактивные элементы должны быть доступны с клавиатуры, иметь видимый focus и понятное accessible name. Использовать семантический HTML вместо кликабельных `div`.
 - У кнопок внутри форм явно задавать `type`; изображениям давать осмысленный `alt`, декоративным — пустой `alt`.

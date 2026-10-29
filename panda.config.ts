@@ -2,7 +2,7 @@ import { defineConfig } from '@pandacss/dev';
 
 export default defineConfig({
   presets: ['@pandacss/preset-base', '@pandacss/preset-panda'],
-  preflight: true,
+  preflight: false,
   include: ['./src/**/*.{ts,tsx}'],
   exclude: [],
   jsxFramework: 'react',
@@ -16,11 +16,9 @@ export default defineConfig({
       minHeight: '100vh',
       lineHeight: '1.5',
       color: 'rgba(0, 0, 0, 0.88)',
-      backgroundColor: '#f5f5f5',
     },
     'html[data-theme="dark"] body': {
       color: 'rgba(255, 255, 255, 0.85)',
-      backgroundColor: '#141414',
     },
     'h1, h2, h3, h4, button, input, label': {
       lineHeight: '1.1',

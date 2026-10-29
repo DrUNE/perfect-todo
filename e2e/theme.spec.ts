@@ -9,7 +9,7 @@ test('switches light and dark themes and persists the selected theme', async ({ 
   await expect(html).toHaveAttribute('data-theme', 'light');
   await page.getByRole('radio', { name: 'Тёмная тема' }).locator('..').click();
   await expect(html).toHaveAttribute('data-theme', 'dark');
-  await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(20, 20, 20)');
+  await expect(page.locator('body')).toHaveCSS('background-color', 'rgb(0, 0, 0)');
 
   await page.reload();
   await expect(html).toHaveAttribute('data-theme', 'dark');

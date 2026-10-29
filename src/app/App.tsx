@@ -17,7 +17,17 @@ export function App() {
         algorithm: resolvedTheme === 'dark' ? theme.darkAlgorithm : theme.defaultAlgorithm,
       }}
     >
-      <TodoPage />
+      <ThemedApp />
     </ConfigProvider>
   );
+}
+
+function ThemedApp() {
+  const { token } = theme.useToken();
+
+  useEffect(() => {
+    document.body.style.backgroundColor = token.colorBgLayout;
+  }, [token.colorBgLayout]);
+
+  return <TodoPage />;
 }
