@@ -47,7 +47,12 @@ export function TodoPage() {
       <ClearCompletedButton />
       <div className={styles.list}>
         {todoList.map((todo) => (
-          <TodoItem key={todo.id} todo={todo} onToggle={toggleTodo} onEdit={() => startEditing(todo)} />
+          <TodoItem
+            key={todo.id}
+            todo={todo}
+            onToggle={toggleTodo}
+            onEdit={() => startEditing(todo)}
+          />
         ))}
       </div>
     </main>

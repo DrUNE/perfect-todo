@@ -1,7 +1,1 @@
-export {
-  addTodo,
-  setTodoList,
-  useTodoList,
-  type NewTodo,
-  type Todo,
-} from './todoStore';
+export { addTodo, setTodoList, useTodoList, type NewTodo, type Todo } from './todoStore';

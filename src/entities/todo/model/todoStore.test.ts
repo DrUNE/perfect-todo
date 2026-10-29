@@ -21,6 +21,8 @@ describe('todoStore', () => {
   it('preserves explicitly provided id and status', () => {
     addTodo({ id: 'todo-1', title: 'Готовая задача', isComplete: true });
 
-    expect(useTodoList.getState().todoList).toEqual([{ id: 'todo-1', title: 'Готовая задача', isComplete: true }]);
+    expect(useTodoList.getState().todoList).toEqual([
+      { id: 'todo-1', title: 'Готовая задача', isComplete: true },
+    ]);
   });
 });

@@ -10,7 +10,13 @@ type AddTodoFormProps = {
   onCancelEdit: () => void;
 };
 
-export function AddTodoForm({ value, isEditing, onChange, onSubmit, onCancelEdit }: AddTodoFormProps) {
+export function AddTodoForm({
+  value,
+  isEditing,
+  onChange,
+  onSubmit,
+  onCancelEdit,
+}: AddTodoFormProps) {
   const inputRef = useRef<InputRef>(null);
 
   useEffect(() => {
@@ -39,7 +45,9 @@ export function AddTodoForm({ value, isEditing, onChange, onSubmit, onCancelEdit
       <Input
         ref={inputRef}
         aria-label="Название задачи"
-        placeholder={isEditing ? 'Enter для сохранения, Esc для отмены' : 'Новая задача, Enter для добавления'}
+        placeholder={
+          isEditing ? 'Enter для сохранения, Esc для отмены' : 'Новая задача, Enter для добавления'
+        }
         value={value}
         onChange={(event) => onChange(event.target.value)}
         onKeyDown={handleKeyDown}

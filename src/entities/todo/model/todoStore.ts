@@ -6,8 +6,7 @@ export type Todo = {
   isComplete: boolean;
 };
 
-export type NewTodo = Omit<Todo, 'id' | 'isComplete'> &
-  Partial<Pick<Todo, 'id' | 'isComplete'>>;
+export type NewTodo = Omit<Todo, 'id' | 'isComplete'> & Partial<Pick<Todo, 'id' | 'isComplete'>>;
 
 type TodoState = {
   todoList: Todo[];

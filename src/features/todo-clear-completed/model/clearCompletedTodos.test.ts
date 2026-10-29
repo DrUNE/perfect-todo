@@ -15,6 +15,8 @@ describe('clearCompletedTodos', () => {
   it('removes completed todos and keeps active todos', () => {
     clearCompletedTodos();
 
-    expect(useTodoList.getState().todoList).toEqual([{ id: 'todo-1', title: 'Активная задача', isComplete: false }]);
+    expect(useTodoList.getState().todoList).toEqual([
+      { id: 'todo-1', title: 'Активная задача', isComplete: false },
+    ]);
   });
 });
