@@ -1,5 +1,5 @@
-import styles from './App.module.css';
-import { addTen, decrement, increment, reset, useCounter } from './model/counterStore';
+import styles from '@/App.module.css';
+import { addTen, decrement, increment, reset, useCounter } from '@/model/counterStore';
 
 function App() {
   const counter = useCounter((state) => state.counter);
