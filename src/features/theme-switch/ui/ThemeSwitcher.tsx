@@ -26,6 +26,7 @@ export function ThemeSwitcher() {
   return (
     <Segmented<ThemePreference>
       aria-label="Тема приложения"
+      size="large"
       name="theme-preference"
       options={options}
       value={preference}
