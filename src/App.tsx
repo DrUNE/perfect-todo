@@ -1,18 +1,24 @@
 import styles from '@/App.module.css';
-import { addTen, decrement, increment, reset, useCounter } from '@/model/counterStore';
+import { addTodo, useTodoList } from '@/model/todoStore';
+import { Button, Card, Checkbox, Input, type InputRef } from 'antd';
+import { useRef } from 'react';
 
-function App() {
-  const counter = useCounter((state) => state.counter);
-
+export function App() {
+  const todoList = useTodoList((state) => state.todoList);
+  const inputRef = useRef<InputRef>(null);
+  const handleAddTodoClick = () => {
+    addTodo({ title: inputRef.current?.input?.value ?? '' });
+  };
   return (
     <div className={styles.wrapper}>
-      <button onClick={increment}>+</button>
-      <span>{counter}</span>
-      <button onClick={decrement}>-</button>
-      <button onClick={addTen}>increase on 10</button>
-      <button onClick={reset}>Reset</button>
+      <Input style={{ width: 300 }} ref={inputRef} />
+      <Button onClick={handleAddTodoClick}>Add TODO</Button>
+      {todoList.map(({ id, isComplete, title }) => (
+        <Card key={id} className={styles.card}>
+          <Checkbox checked={isComplete} />
+          <span>{title}</span>
+        </Card>
+      ))}
     </div>
   );
 }
-
-export default App;

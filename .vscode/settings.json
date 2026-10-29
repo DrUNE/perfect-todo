@@ -4,5 +4,14 @@
   "editor.codeActionsOnSave": {
     "source.fixAll.oxc": "always"
   },
-  "files.autoSave": "onFocusChange"
+  "files.autoSave": "onFocusChange",
+  "prettier.enable": false,
+  "js/ts.format.enabled": false,
+  "js/ts.suggest.autoImports": true,
+  "js/ts.suggest.paths": true,
+  "js/ts.preferences.quoteStyle": "single",
+  "js/ts.preferences.importModuleSpecifier": "non-relative",
+  "js/ts.preferences.importModuleSpecifierEnding": "minimal",
+  "js/ts.preferences.preferTypeOnlyAutoImports": true,
+  "js/ts.updateImportsOnFileMove.enabled": "always"
 }
