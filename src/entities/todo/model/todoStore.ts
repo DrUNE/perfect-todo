@@ -1,26 +1,26 @@
 import { create } from 'zustand';
 
-type WithOptional<T, K extends keyof T> = Omit<T, K> & { [P in K]?: T[P] };
-type WithOptionalMultiple<T, K extends keyof T> = Omit<T, K> & {
-  [P in K]?: T[P];
-};
-
 export type Todo = {
   id: string;
   title: string;
   isComplete: boolean;
 };
 
-const initialState = {
-  todoList: [] as Todo[],
+export type NewTodo = Omit<Todo, 'id' | 'isComplete'> &
+  Partial<Pick<Todo, 'id' | 'isComplete'>>;
+
+type TodoState = {
+  todoList: Todo[];
 };
 
-export const useTodoList = create(() => ({ ...initialState }));
+const initialState: TodoState = {
+  todoList: [],
+};
+
+export const useTodoList = create<TodoState>(() => ({ ...initialState }));
 export const setTodoList = useTodoList.setState;
 
-export const addTodo = (
-  todo: WithOptionalMultiple<Todo, 'id' | 'isComplete'>,
-) => {
+export const addTodo = (todo: NewTodo) => {
   setTodoList(({ todoList }) => ({
     todoList: [
       ...todoList,

@@ -1,7 +1,7 @@
 {
   "name": "zustand-lessons",
-  "private": true,
   "version": "0.0.0",
+  "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -9,6 +9,8 @@
     "lint": "oxlint",
     "fmt": "oxfmt",
     "fmt:check": "oxfmt --check",
+    "test": "vitest",
+    "test:run": "vitest run",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -26,6 +28,7 @@
     "oxfmt": "^0.75.0",
     "oxlint": "^1.89.0",
     "typescript": "~7.0.2",
-    "vite": "^8.3.5"
+    "vite": "^8.3.5",
+    "vitest": "^5.0.5"
   }
 }
