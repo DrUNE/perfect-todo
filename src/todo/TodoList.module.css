@@ -1,0 +1,4 @@
+/* Имя для View Transition: браузер анимирует рост и сжатие рамки списка (см. shared/withViewTransition). */
+.list {
+  view-transition-name: todo-list;
+}

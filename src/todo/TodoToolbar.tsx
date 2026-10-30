@@ -1,46 +1,20 @@
-import { GtkBox, GtkButton } from '@gtk-js/adwaita';
-import { useDeviceInfo } from '@/shared/useDeviceInfo';
+import { GtkBox } from '@gtk-js/adwaita';
 import { ClearCompletedButton } from './ClearCompletedButton';
 import styles from './TodoToolbar.module.css';
 import { useTodoList } from './todoStore';
 
 type TodoToolbarProps = {
-  /** В поле ввода есть текст или идёт редактирование задачи. */
-  isInputActive: boolean;
-  canConfirm: boolean;
-  onConfirm: () => void;
-  onCancel: () => void;
+  onClearCompleted: () => void;
 };
 
-// Панель иконок-действий над полем ввода: слева действия над списком, справа подтверждение и отмена
-// ввода на устройствах с тач-экраном (там нет Esc).
-export function TodoToolbar({ isInputActive, canConfirm, onConfirm, onCancel }: TodoToolbarProps) {
+// Панель иконок-действий над списком. Место под неё зарезервировано всегда (см. TodoToolbar.module.css),
+// чтобы появление и исчезновение кнопок не сдвигало строку ввода и список.
+export function TodoToolbar({ onClearCompleted }: TodoToolbarProps) {
   const hasCompletedTodos = useTodoList((state) => state.todoList.some((todo) => todo.isComplete));
-  const { hasTouch } = useDeviceInfo();
-  const showInputActions = hasTouch && isInputActive;
 
   return (
     <GtkBox spacing={8} className={styles.toolbar}>
-      {hasCompletedTodos && <ClearCompletedButton />}
-      {showInputActions && (
-        <GtkBox spacing={8} className={styles.inputActions}>
-          <GtkButton
-            className="circular"
-            iconName="WindowClose"
-            aria-label="Отмена"
-            tooltipText="Отмена"
-            onClicked={onCancel}
-          />
-          <GtkButton
-            className="circular suggested-action"
-            iconName="ObjectSelect"
-            aria-label="Подтвердить"
-            tooltipText="Подтвердить"
-            disabled={!canConfirm}
-            onClicked={onConfirm}
-          />
-        </GtkBox>
-      )}
+      {hasCompletedTodos && <ClearCompletedButton onClick={onClearCompleted} />}
     </GtkBox>
   );
 }

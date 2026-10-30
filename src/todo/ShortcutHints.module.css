@@ -1,0 +1,32 @@
+/* Полоса подсказок внизу окна: закреплена, поэтому в TodoPage.module.css у контента есть запас снизу. */
+.hints {
+  position: fixed;
+  inset: auto 0 0;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px 16px;
+  min-height: 40px;
+  padding: 10px 16px;
+  background-color: var(--window-bg-color);
+  color: var(--window-fg-color);
+  font-size: 0.85rem;
+  line-height: 1.2;
+}
+
+.hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  opacity: 0.75;
+}
+
+.key {
+  padding: 1px 6px;
+  border-radius: 4px;
+  background-color: color-mix(in srgb, currentColor 12%, transparent);
+  font: inherit;
+  font-weight: 600;
+  white-space: nowrap;
+}

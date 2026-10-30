@@ -1,84 +1,140 @@
-import { AdwClamp, AdwPreferencesGroup } from '@gtk-js/adwaita';
-import { useState } from 'react';
+import { AdwClamp, AdwToastOverlay, type AdwToastOverlayRef } from '@gtk-js/adwaita';
+import { useEffect, useEffectEvent, useRef, useState } from 'react';
 import { withViewTransition } from '@/shared/withViewTransition';
-import { AddTodoForm } from './AddTodoForm';
+import { NewTodoRow } from './NewTodoRow';
 import styles from './TodoPage.module.css';
+import { ShortcutHints } from './ShortcutHints';
+import { TodoList } from './TodoList';
 import { TodoToolbar } from './TodoToolbar';
-import { TodoItem } from './TodoItem';
-import { addTodo, deleteTodo, editTodo, toggleTodo, useTodoList, type Todo } from './todoStore';
+import { clearCompletedTodos, deleteTodo, undoDelete, useTodoList, type Todo } from './todoStore';
+
+const isEditableTarget = (target: EventTarget | null) =>
+  target instanceof HTMLElement &&
+  (target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName));
+
+type Announcement = { id: number; message: string };
 
 export function TodoPage() {
-  const todoList = useTodoList((state) => state.todoList);
-  const [title, setTitle] = useState('');
-  const [editingTodo, setEditingTodo] = useState<Todo | null>(null);
+  const toastRef = useRef<AdwToastOverlayRef>(null);
+  const newTodoRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+  const [announcement, setAnnouncement] = useState<Announcement>({ id: 0, message: '' });
 
-  const cancelEditing = () => {
-    setEditingTodo(null);
-    setTitle('');
+  // Каждое сообщение — новый элемент, чтобы скринридер озвучил и повторяющийся текст.
+  const announce = (message: string) => {
+    setAnnouncement((current) => ({ id: current.id + 1, message }));
   };
 
-  const handleSubmit = () => {
-    if (editingTodo) {
-      if (editTodo(editingTodo.id, title)) {
-        cancelEditing();
-      }
+  const focusNewTodo = () => {
+    newTodoRef.current?.querySelector('input')?.focus();
+  };
+
+  // Перейти к списку: фокус получает строка, которая является его Tab-остановкой.
+  const focusList = () => {
+    listRef.current?.querySelector<HTMLElement>('[data-todo-id][tabindex="0"]')?.focus();
+  };
+
+  // Если сфокусированный элемент исчез вместе с удалённой строкой, фокус не должен теряться.
+  const restoreLostFocus = () => {
+    if (document.activeElement && document.activeElement !== document.body) {
       return;
     }
 
-    withViewTransition(() => addTodo(title));
-    setTitle('');
+    if (listRef.current?.querySelector<HTMLElement>('[data-todo-id][tabindex="0"]')) {
+      focusList();
+    } else {
+      focusNewTodo();
+    }
   };
 
-  const handleDelete = (id: Todo['id']) => {
-    if (editingTodo?.id === id) {
-      cancelEditing();
+  const undo = () => {
+    if (useTodoList.getState().deletedTodos.length === 0) {
+      return;
     }
 
-    withViewTransition(() => deleteTodo(id));
+    withViewTransition(() => undoDelete());
+    toastRef.current?.dismissAll();
+    announce('Удаление отменено');
   };
 
-  const startEditing = (todo: Todo) => {
-    setEditingTodo(todo);
-    setTitle(todo.title);
+  const deleteWithUndo = (id: Todo['id']) => {
+    withViewTransition(() => deleteTodo(id));
+    toastRef.current?.addToast({
+      title: 'Задача удалена',
+      buttonLabel: 'Отменить',
+      timeout: 6,
+      onButtonClicked: undo,
+    });
   };
+
+  const clearCompleted = () => {
+    const count = useTodoList.getState().todoList.filter((todo) => todo.isComplete).length;
+
+    if (count === 0) {
+      return;
+    }
+
+    withViewTransition(() => clearCompletedTodos(), restoreLostFocus);
+    toastRef.current?.addToast({
+      title: `Удалено завершённых задач: ${count}`,
+      buttonLabel: 'Отменить',
+      timeout: 6,
+      onButtonClicked: undo,
+    });
+  };
+
+  // Сочетания клавиш на уровне страницы. В полях ввода они не срабатывают: там Ctrl+Z отменяет ввод текста.
+  const handleDocumentKeyDown = useEffectEvent((event: KeyboardEvent) => {
+    if (isEditableTarget(event.target)) {
+      return;
+    }
+
+    if (event.ctrlKey && !event.shiftKey && !event.altKey && event.code === 'KeyZ') {
+      event.preventDefault();
+      undo();
+    } else if (event.shiftKey && !event.ctrlKey && !event.altKey && event.key === 'Delete') {
+      event.preventDefault();
+      clearCompleted();
+    }
+  });
+
+  useEffect(() => {
+    const listener = (event: KeyboardEvent) => handleDocumentKeyDown(event);
+
+    document.addEventListener('keydown', listener);
+
+    return () => document.removeEventListener('keydown', listener);
+  }, []);
 
   return (
-    <AdwClamp maximumSize={400}>
-      <div className={styles.content}>
-        <div className={styles.stickyBar}>
-          <div aria-hidden className={styles.fade} />
-          <div className={styles.stickyContent}>
-            <TodoToolbar
-              isInputActive={editingTodo !== null || title !== ''}
-              canConfirm={title.trim() !== ''}
-              onConfirm={handleSubmit}
-              onCancel={cancelEditing}
-            />
-            <div className={styles.input}>
-              <AddTodoForm
-                value={title}
-                isEditing={editingTodo !== null}
-                onChange={setTitle}
-                onSubmit={handleSubmit}
-                onCancelEdit={cancelEditing}
-              />
+    <>
+      <AdwClamp maximumSize={400}>
+        <div className={styles.content}>
+          <div className={styles.stickyBar}>
+            <div aria-hidden className={styles.fade} />
+            <div className={styles.stickyContent}>
+              <TodoToolbar onClearCompleted={clearCompleted} />
+              <div ref={newTodoRef} data-new-todo className={styles.input}>
+                <NewTodoRow
+                  onNavigateDown={focusList}
+                  onAdded={() => announce('Задача добавлена')}
+                />
+              </div>
             </div>
           </div>
+          <div ref={listRef}>
+            <TodoList onDelete={deleteWithUndo} onNavigateUp={focusNewTodo} announce={announce} />
+          </div>
         </div>
-        {todoList.length > 0 && (
-          <AdwPreferencesGroup className={styles.list}>
-            {todoList.map((todo) => (
-              <TodoItem
-                key={todo.id}
-                todo={todo}
-                onToggle={toggleTodo}
-                onEdit={() => startEditing(todo)}
-                onDelete={handleDelete}
-              />
-            ))}
-          </AdwPreferencesGroup>
-        )}
+      </AdwClamp>
+      <AdwToastOverlay
+        toastRef={toastRef}
+        style={{ position: 'fixed', inset: '0 0 40px', pointerEvents: 'none' }}
+      />
+      <ShortcutHints />
+      <div role="status" aria-live="polite" className={styles.visuallyHidden}>
+        <span key={announcement.id}>{announcement.message}</span>
       </div>
-    </AdwClamp>
+    </>
   );
 }

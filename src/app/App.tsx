@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { ThemeSwitcher } from '@/theme/ThemeSwitcher';
 import { useDeviceInfo } from '@/shared/useDeviceInfo';
 import { useResolvedTheme } from '@/theme/themeStore';
+import { ShortcutsHelp } from '@/todo/ShortcutsHelp';
 import { TodoPage } from '@/todo/TodoPage';
 
 export function App() {
@@ -31,6 +32,7 @@ export function App() {
         showStartTitleButtons={false}
         showEndTitleButtons={false}
         showTitle={false}
+        start={<ShortcutsHelp />}
         end={<ThemeSwitcher />}
       />
       <TodoPage />

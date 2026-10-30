@@ -1,4 +1,13 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
+
+const newTodoInput = (page: Page) => page.getByRole('textbox', { name: 'Новая задача' });
+
+const addTodo = async (page: Page, title: string) => {
+  await newTodoInput(page).fill(title);
+  await newTodoInput(page).press('Enter');
+  // Добавление применяется внутри View Transition, то есть чуть позже нажатия Enter.
+  await expect(page.getByRole('checkbox', { name: title, exact: true })).toBeVisible();
+};
 
 test.describe('desktop with mouse', () => {
   test('is not mobile, has no touch and has a mouse', async ({ page }) => {
@@ -20,20 +29,20 @@ test.describe('desktop with mouse', () => {
     await expect(html).toHaveAttribute('data-compact', 'true');
     await expect(html).toHaveAttribute('data-mobile', 'false');
   });
-});
 
-test('desktop with mouse has no confirm and cancel buttons', async ({ page }) => {
-  await page.goto('/');
-  await page.getByRole('textbox', { name: 'Название задачи' }).fill('Черновик');
+  test('has no confirm and cancel buttons while typing a new todo', async ({ page }) => {
+    await page.goto('/');
+    await newTodoInput(page).fill('Черновик');
 
-  await expect(page.getByRole('button', { name: 'Подтвердить' })).toHaveCount(0);
-  await expect(page.getByRole('button', { name: 'Отмена' })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Подтвердить' })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Отмена' })).toHaveCount(0);
+  });
 });
 
 test.describe('touch-only mobile device', () => {
   test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
 
-  test('detects mobile touch screen and cancels editing with a button', async ({ page }) => {
+  test('is detected as a mobile touch screen', async ({ page }) => {
     await page.goto('/');
 
     const html = page.locator('html');
@@ -42,55 +51,21 @@ test.describe('touch-only mobile device', () => {
     await expect(html).toHaveAttribute('data-compact', 'true');
     await expect(html).toHaveAttribute('data-touch', 'true');
     await expect(html).toHaveAttribute('data-mouse', 'false');
-
-    const input = page.getByRole('textbox', { name: 'Название задачи' });
-
-    await input.fill('Задача');
-    await input.press('Enter');
-    await expect(page.getByRole('button', { name: 'Отмена' })).toHaveCount(0);
-
-    await page.getByRole('button', { name: 'Редактировать задачу' }).tap();
-    await input.fill('Несохранённое название');
-    await page.getByRole('button', { name: 'Отмена' }).tap();
-
-    await expect(input).toHaveValue('');
-    await expect(page.getByRole('button', { name: 'Отмена' })).toHaveCount(0);
-    await expect(page.getByRole('checkbox', { name: 'Задача' })).toBeVisible();
   });
-});
 
-test.describe('unfolded foldable smartphone', () => {
-  test.use({ viewport: { width: 880, height: 920 }, hasTouch: true, isMobile: true });
-
-  test('stays a touch device on a wide screen and offers the cancel button', async ({ page }) => {
+  test('does not show keyboard shortcut hints', async ({ page }) => {
     await page.goto('/');
+    await newTodoInput(page).focus();
 
-    const html = page.locator('html');
-
-    await expect(html).toHaveAttribute('data-mobile', 'true');
-    await expect(html).toHaveAttribute('data-compact', 'false');
-    await expect(html).toHaveAttribute('data-touch', 'true');
-    await expect(html).toHaveAttribute('data-mouse', 'false');
-
-    const input = page.getByRole('textbox', { name: 'Название задачи' });
-
-    await input.fill('Задача');
-    await input.press('Enter');
-    await page.getByRole('button', { name: 'Редактировать задачу' }).tap();
-
-    await expect(page.getByRole('button', { name: 'Отмена' })).toBeVisible();
+    await expect(page.getByRole('note', { name: 'Подсказка по горячим клавишам' })).toHaveCount(0);
   });
-});
 
-test.describe('confirm and cancel buttons on a touch device', () => {
-  test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
-
-  test('are shown only while the input is active, confirm adds a todo, cancel clears the input', async ({
+  test('shows confirm and cancel inside the new todo row only while it has text', async ({
     page,
   }) => {
     await page.goto('/');
 
-    const input = page.getByRole('textbox', { name: 'Название задачи' });
+    const input = newTodoInput(page);
     const confirm = page.getByRole('button', { name: 'Подтвердить' });
     const cancel = page.getByRole('button', { name: 'Отмена' });
 
@@ -115,69 +90,56 @@ test.describe('confirm and cancel buttons on a touch device', () => {
     await expect(cancel).toHaveCount(0);
   });
 
-  test('confirm saves an edited todo', async ({ page }) => {
+  test('edits a todo in place with confirm and cancel buttons inside its row', async ({ page }) => {
     await page.goto('/');
+    await addTodo(page, 'Старое');
 
-    const input = page.getByRole('textbox', { name: 'Название задачи' });
+    const editInput = page.getByRole('textbox', { name: 'Название задачи' });
 
-    await input.fill('Старое');
-    await input.press('Enter');
     await page.getByRole('button', { name: 'Редактировать задачу' }).tap();
-    await input.fill('Новое');
+    await expect(editInput).toBeFocused();
+    await editInput.fill('Несохранённое');
+    await page.getByRole('button', { name: 'Отмена' }).tap();
+
+    await expect(page.getByRole('checkbox', { name: 'Старое' })).toBeVisible();
+    await expect(page.getByText('Несохранённое')).toHaveCount(0);
+
+    await page.getByRole('button', { name: 'Редактировать задачу' }).tap();
+    await editInput.fill('Новое');
     await page.getByRole('button', { name: 'Подтвердить' }).tap();
 
     await expect(page.getByRole('checkbox', { name: 'Новое' })).toBeVisible();
-    await expect(input).toHaveValue('');
+    await expect(page.getByRole('button', { name: 'Подтвердить' })).toHaveCount(0);
   });
 
-  test('keeps the clear icon on the left and the actions on the right', async ({ page }) => {
+  test('does not shift the new todo row when confirm and cancel buttons appear', async ({
+    page,
+  }) => {
     await page.goto('/');
 
-    const input = page.getByRole('textbox', { name: 'Название задачи' });
-
-    await input.fill('Готовая');
-    await input.press('Enter');
-    await page.getByRole('checkbox', { name: 'Готовая' }).check();
-    await input.fill('Черновик');
-
-    const clear = await page.getByRole('button', { name: 'Удалить завершённые' }).boundingBox();
-    const confirm = await page.getByRole('button', { name: 'Подтвердить' }).boundingBox();
-
-    expect(clear?.x).toBeLessThan(confirm?.x ?? 0);
-  });
-});
-
-test.describe('toolbar space on a touch device', () => {
-  test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
-
-  test('does not shift the input when confirm and cancel buttons appear', async ({ page }) => {
-    await page.goto('/');
-
-    const input = page.getByRole('textbox', { name: 'Название задачи' });
+    const input = newTodoInput(page);
     const initialBox = await input.boundingBox();
 
     await input.fill('Черновик');
     await expect(page.getByRole('button', { name: 'Подтвердить' })).toBeVisible();
 
-    expect(await input.boundingBox()).toEqual(initialBox);
+    expect(await input.boundingBox()).toMatchObject({
+      y: initialBox?.y,
+      height: initialBox?.height,
+    });
 
     await input.fill('');
     await expect(page.getByRole('button', { name: 'Подтвердить' })).toHaveCount(0);
 
-    expect(await input.boundingBox()).toEqual(initialBox);
+    expect(await input.boundingBox()).toMatchObject({
+      y: initialBox?.y,
+      height: initialBox?.height,
+    });
   });
-});
 
-test.describe('task action buttons on a touch device', () => {
-  test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
-
-  test('are always visible without hover', async ({ page }) => {
+  test('keeps the task action buttons always visible without hover', async ({ page }) => {
     await page.goto('/');
-
-    const input = page.getByRole('textbox', { name: 'Название задачи' });
-
-    await input.fill('Задача');
-    await input.press('Enter');
+    await addTodo(page, 'Задача');
 
     await expect(page.getByRole('button', { name: 'Редактировать задачу' })).toHaveCSS(
       'opacity',
@@ -187,5 +149,42 @@ test.describe('task action buttons on a touch device', () => {
     await page.getByRole('checkbox', { name: 'Задача' }).tap();
 
     await expect(page.getByRole('button', { name: 'Удалить задачу' })).toHaveCSS('opacity', '1');
+  });
+
+  test('deletes a todo with the trash button and undoes it by the toast button', async ({
+    page,
+  }) => {
+    await page.goto('/');
+    await addTodo(page, 'Задача');
+    await page.getByRole('checkbox', { name: 'Задача' }).tap();
+    await page.getByRole('button', { name: 'Удалить задачу' }).tap();
+
+    await expect(page.getByRole('checkbox')).toHaveCount(0);
+
+    await page.getByRole('button', { name: 'Отменить' }).tap();
+
+    await expect(page.getByRole('checkbox', { name: 'Задача' })).toBeVisible();
+  });
+});
+
+test.describe('unfolded foldable smartphone', () => {
+  test.use({ viewport: { width: 880, height: 920 }, hasTouch: true, isMobile: true });
+
+  test('stays a touch device on a wide screen and shows confirm and cancel buttons', async ({
+    page,
+  }) => {
+    await page.goto('/');
+
+    const html = page.locator('html');
+
+    await expect(html).toHaveAttribute('data-mobile', 'true');
+    await expect(html).toHaveAttribute('data-compact', 'false');
+    await expect(html).toHaveAttribute('data-touch', 'true');
+    await expect(html).toHaveAttribute('data-mouse', 'false');
+
+    await newTodoInput(page).fill('Задача');
+
+    await expect(page.getByRole('button', { name: 'Подтвердить' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Отмена' })).toBeVisible();
   });
 });

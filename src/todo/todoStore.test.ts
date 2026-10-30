@@ -5,6 +5,7 @@ import {
   deleteTodo,
   editTodo,
   toggleTodo,
+  undoDelete,
   useTodoList,
   type Todo,
 } from './todoStore';
@@ -16,7 +17,7 @@ const initialTodoList: Todo[] = [
 
 describe('todoStore', () => {
   beforeEach(() => {
-    useTodoList.setState({ todoList: initialTodoList });
+    useTodoList.setState({ todoList: initialTodoList, deletedTodos: [] });
   });
 
   describe('addTodo', () => {
@@ -85,11 +86,53 @@ describe('todoStore', () => {
 
   describe('clearCompletedTodos', () => {
     it('removes completed todos and keeps active todos', () => {
-      clearCompletedTodos();
-
+      expect(clearCompletedTodos()).toBe(1);
       expect(useTodoList.getState().todoList).toEqual([
         { id: 'todo-1', title: 'Первая задача', isComplete: false },
       ]);
+    });
+  });
+
+  describe('undoDelete', () => {
+    it('returns a deleted todo to its previous position', () => {
+      deleteTodo('todo-1');
+
+      expect(undoDelete()).toBe(1);
+      expect(useTodoList.getState().todoList).toEqual(initialTodoList);
+      expect(useTodoList.getState().deletedTodos).toEqual([]);
+    });
+
+    it('returns all todos removed by clearing completed ones in their original order', () => {
+      useTodoList.setState({
+        todoList: [
+          { id: 'a', title: 'A', isComplete: true },
+          { id: 'b', title: 'B', isComplete: false },
+          { id: 'c', title: 'C', isComplete: true },
+          { id: 'd', title: 'D', isComplete: false },
+        ],
+      });
+
+      expect(clearCompletedTodos()).toBe(2);
+      expect(useTodoList.getState().todoList.map((todo) => todo.id)).toEqual(['b', 'd']);
+      expect(undoDelete()).toBe(2);
+      expect(useTodoList.getState().todoList.map((todo) => todo.id)).toEqual(['a', 'b', 'c', 'd']);
+    });
+
+    it('puts the todo back after its previous neighbour even if new todos were added on top', () => {
+      deleteTodo('todo-2');
+      addTodo('Новая');
+      undoDelete();
+
+      expect(useTodoList.getState().todoList.map((todo) => todo.title)).toEqual([
+        'Новая',
+        'Первая задача',
+        'Вторая задача',
+      ]);
+    });
+
+    it('does nothing when there is nothing to undo', () => {
+      expect(undoDelete()).toBe(0);
+      expect(useTodoList.getState().todoList).toEqual(initialTodoList);
     });
   });
 });

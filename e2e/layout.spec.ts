@@ -10,13 +10,16 @@ test.use({ launchOptions: { ignoreDefaultArgs: ['--hide-scrollbars'] } });
 test('scrolls the whole page and keeps only the input stuck to the top', async ({ page }) => {
   await page.goto('/');
 
-  const input = page.getByRole('textbox', { name: 'Название задачи' });
+  const input = page.getByRole('textbox', { name: 'Новая задача' });
   const themeSwitcher = page.getByRole('radiogroup', { name: 'Тема приложения' });
   const initialBox = await input.boundingBox();
 
   for (let index = 1; index <= 15; index++) {
     await input.fill(`Задача ${index}`);
     await input.press('Enter');
+    await expect(
+      page.getByRole('checkbox', { name: `Задача ${index}`, exact: true }),
+    ).toBeVisible();
   }
 
   await expect(themeSwitcher).toBeInViewport();
@@ -35,8 +38,8 @@ test('scrolls the whole page and keeps only the input stuck to the top', async (
 
   expect(stuckBox?.x).toBe(initialBox?.x);
   expect(stuckBox?.y).toBeLessThan(initialBox?.y ?? 0);
-  // Закрепляется вся полоса: отступ 16px, постоянная панель действий (34px + 8px) и поле ввода.
-  expect(stuckBox?.y).toBeLessThanOrEqual(16 + 34 + 8);
+  // Закрепляется вся полоса: отступ 16px, постоянная панель действий (34px + 8px) и строка ввода.
+  expect(stuckBox?.y).toBeLessThanOrEqual(16 + 34 + 8 + 24);
 });
 
 test('does not shift the input and the list when toolbar buttons appear and disappear', async ({
@@ -44,7 +47,7 @@ test('does not shift the input and the list when toolbar buttons appear and disa
 }) => {
   await page.goto('/');
 
-  const input = page.getByRole('textbox', { name: 'Название задачи' });
+  const input = page.getByRole('textbox', { name: 'Новая задача' });
 
   await input.fill('Задача');
   await input.press('Enter');
@@ -56,13 +59,15 @@ test('does not shift the input and the list when toolbar buttons appear and disa
 
   const inputBox = await input.boundingBox();
   const checkboxBox = await checkbox.boundingBox();
+  // Ширина поля зависит от фокуса (без фокуса AdwEntryRow показывает значок карандаша), поэтому сравниваем положение и высоту.
+  const position = (box: typeof inputBox) => ({ x: box?.x, y: box?.y, height: box?.height });
 
   await expect(clearButton).toHaveCount(0);
   await checkbox.check();
   await expect(clearButton).toBeVisible();
   await waitForAnimations(page);
 
-  expect(await input.boundingBox()).toEqual(inputBox);
+  expect(position(await input.boundingBox())).toEqual(position(inputBox));
   expect(await checkbox.boundingBox()).toEqual(checkboxBox);
 
   await clearButton.click();
@@ -70,7 +75,8 @@ test('does not shift the input and the list when toolbar buttons appear and disa
 
   await input.fill('Ещё задача');
   await input.press('Enter');
+  await expect(page.getByRole('checkbox', { name: 'Ещё задача' })).toBeVisible();
   await waitForAnimations(page);
 
-  expect(await input.boundingBox()).toEqual(inputBox);
+  expect(position(await input.boundingBox())).toEqual(position(inputBox));
 });
