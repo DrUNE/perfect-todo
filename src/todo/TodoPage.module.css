@@ -1,5 +1,11 @@
 .content {
-  padding: 0 16px 16px;
+  /* Снизу запас под закреплённую полосу подсказок (см. ShortcutHints). */
+  padding: 0 16px 56px;
+}
+
+/* Только касания: подсказок нет, снизу запас под панель кнопок (см. TodoToolbar.module.css). */
+.contentWithBottomBar {
+  padding: 0 16px 72px;
 }
 
 /* Закреплённая полоса с панелью и полем ввода. Её нижние --fade-height — отступ перед списком, в котором
@@ -37,11 +43,19 @@
   position: relative;
 }
 
-/* Имена для View Transition: браузер анимирует сдвиг этих блоков (см. shared/withViewTransition). */
+/* Имя для View Transition: браузер анимирует сдвиг этого блока (см. shared/withViewTransition). */
 .input {
   view-transition-name: todo-input;
 }
 
-.list {
-  view-transition-name: todo-list;
+/* Текст только для скринридеров. */
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
