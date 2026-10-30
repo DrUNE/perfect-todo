@@ -27,9 +27,11 @@ export function TodoList({ onDelete, onNavigateUp, announce }: TodoListProps) {
   const pendingFocusId = useRef<Todo['id'] | null>(null);
 
   // Фокус на строку после того, как редактор заменился строкой, можно поставить только после рендера.
+  // Без прокрутки: новая строка какое-то время стоит в конце списка (AdwPreferencesGroup ставит её на место
+  // позже), и обычный focus() прокрутил бы страницу вниз. Редактируемая строка и так была на экране.
   useEffect(() => {
     if (pendingFocusId.current) {
-      findRow(containerRef.current, pendingFocusId.current)?.focus();
+      findRow(containerRef.current, pendingFocusId.current)?.focus({ preventScroll: true });
       pendingFocusId.current = null;
     }
   });

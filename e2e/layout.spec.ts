@@ -101,3 +101,33 @@ test('does not clip the list shadow at the sides', async ({ page }) => {
   expect(gaps?.left).toBeGreaterThanOrEqual(16);
   expect(gaps?.right).toBeGreaterThanOrEqual(16);
 });
+
+test('does not scroll the page after saving an edit with Enter', async ({ page }) => {
+  await page.goto('/');
+
+  const input = newTodoInput(page);
+
+  for (let index = 1; index <= 15; index++) {
+    await input.fill(`Задача ${index}`);
+    await input.press('Enter');
+    await expect(todoRow(page, `Задача ${index}`)).toBeVisible();
+  }
+
+  await waitForAnimations(page);
+  await todoRow(page, 'Задача 8').click();
+
+  const editInput = page.getByRole('textbox', { name: 'Название задачи' });
+
+  await expect(editInput).toBeFocused();
+  await waitForAnimations(page);
+
+  // Playwright мог прокрутить страницу к строке перед кликом: сравниваем с положением во время правки.
+  const scrollBefore = await page.locator('html').evaluate((html) => html.scrollTop);
+
+  await editInput.fill('Задача 8 правка');
+  await editInput.press('Enter');
+  await expect(todoRow(page, 'Задача 8 правка')).toBeFocused();
+  await waitForAnimations(page);
+
+  expect(await page.locator('html').evaluate((html) => html.scrollTop)).toBe(scrollBefore);
+});
