@@ -1,4 +1,5 @@
 import { AdwActionRow, GtkBox, GtkButton } from '@gtk-js/adwaita';
+import type { MouseEvent } from 'react';
 import { useHorizontalSwipe } from '@/shared/useHorizontalSwipe';
 import styles from './TodoItem.module.css';
 import type { Todo } from './todoStore';
@@ -19,7 +20,8 @@ const escapeMarkup = (text: string) =>
 
 // Строка задачи в режиме просмотра. Сама строка фокусируется и управляется с клавиатуры (см. TodoList),
 // кнопки внутри неё в Tab-порядок не входят, чтобы список проходился одной остановкой.
-// Статус «сделано» меняют кнопка (мышь), горизонтальный свайп (касания) и Пробел (клавиатура).
+// Статус «сделано» меняют кнопка (мышь), горизонтальный свайп (касания) и Пробел (клавиатура);
+// редактирование начинают клик или тап по строке, Enter и F2.
 export function TodoItem({
   todo,
   isTabStop,
@@ -29,6 +31,21 @@ export function TodoItem({
   onDelete,
 }: TodoItemProps) {
   const { swipeProps, swipeStyle } = useHorizontalSwipe({ onSwipe: () => onToggle(todo.id) });
+
+  // Клик по самой строке начинает редактирование; клики по кнопкам внутри неё и выделение текста не считаются.
+  const handleClick = (event: MouseEvent<HTMLElement>) => {
+    const target = event.target;
+
+    if (target instanceof Element && target.closest('button')) {
+      return;
+    }
+
+    if (window.getSelection()?.toString()) {
+      return;
+    }
+
+    onEdit(todo.id);
+  };
 
   return (
     <AdwActionRow
@@ -41,7 +58,7 @@ export function TodoItem({
       style={{ ...swipeStyle, viewTransitionName: `todo-${todo.id}` }}
       title={todo.isComplete ? `<s>${escapeMarkup(todo.title)}</s>` : todo.title}
       useMarkup={todo.isComplete}
-      onDoubleClick={() => onEdit(todo.id)}
+      onClick={handleClick}
       suffixWidget={
         <GtkBox spacing={4} valign="center">
           {showStatusButton && (
@@ -55,7 +72,7 @@ export function TodoItem({
               onClicked={() => onToggle(todo.id)}
             />
           )}
-          {todo.isComplete ? (
+          {todo.isComplete && (
             <GtkButton
               tabIndex={-1}
               className={`circular ${styles.action}`}
@@ -63,15 +80,6 @@ export function TodoItem({
               iconName="UserTrash"
               aria-label="Удалить задачу"
               onClicked={() => onDelete(todo.id)}
-            />
-          ) : (
-            <GtkButton
-              tabIndex={-1}
-              className={`circular ${styles.action}`}
-              hasFrame={false}
-              iconName="DocumentEdit"
-              aria-label="Редактировать задачу"
-              onClicked={() => onEdit(todo.id)}
             />
           )}
         </GtkBox>

@@ -108,10 +108,11 @@ test.describe('touch-only mobile device', () => {
 
     await expect(page.getByRole('checkbox')).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Отметить как сделанное' })).toHaveCount(0);
-    await expect(row.getByRole('button', { name: 'Редактировать задачу' })).toBeVisible();
+    await expect(row.getByRole('button', { name: 'Редактировать задачу' })).toHaveCount(0);
 
     await swipeRow(page, 'Свайп', 120);
     await expect(row).toHaveAccessibleName('Свайп, выполнено');
+    await expect(page.getByRole('textbox', { name: 'Название задачи' })).toHaveCount(0);
     await expect(row.getByRole('button', { name: 'Удалить задачу' })).toBeVisible();
     await expect(page.getByText('Задача «Свайп» выполнена')).toBeAttached();
 
@@ -193,7 +194,7 @@ test.describe('touch-only mobile device', () => {
 
     const editInput = page.getByRole('textbox', { name: 'Название задачи' });
 
-    await page.getByRole('button', { name: 'Редактировать задачу' }).tap();
+    await todoRow(page, 'Старое').tap();
     await expect(editInput).toBeFocused();
     await editInput.fill('Несохранённое');
     await page.getByRole('button', { name: 'Отмена' }).tap();
@@ -201,7 +202,7 @@ test.describe('touch-only mobile device', () => {
     await expect(todoRow(page, 'Старое')).toBeVisible();
     await expect(page.getByText('Несохранённое')).toHaveCount(0);
 
-    await page.getByRole('button', { name: 'Редактировать задачу' }).tap();
+    await todoRow(page, 'Старое').tap();
     await editInput.fill('Новое');
     await page.getByRole('button', { name: 'Подтвердить' }).tap();
 
@@ -237,11 +238,6 @@ test.describe('touch-only mobile device', () => {
   test('keeps the task action buttons always visible without hover', async ({ page }) => {
     await page.goto('/');
     await addTodo(page, 'Задача');
-
-    await expect(page.getByRole('button', { name: 'Редактировать задачу' })).toHaveCSS(
-      'opacity',
-      '1',
-    );
 
     await swipeRow(page, 'Задача');
 
