@@ -1,0 +1,34 @@
+/* Строка новой задачи выглядит как строка списка (см. TodoItemEditor.module.css): текст на том же месте и
+   только курсор ввода. Название «Новая задача» остаётся на месте текста, пока поле пусто, как подсказка, и
+   пропадает при вводе вместо того, чтобы всплывать маленьким заголовком. Inline-стили AdwEntryRow задают
+   положение напрямую, поэтому нужен !important. */
+.row {
+  composes: editor from './TodoItemEditor.module.css';
+}
+
+.row.row :global(.title) {
+  position: absolute !important;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  width: auto;
+  height: auto;
+  clip-path: none;
+  font-size: inherit !important;
+  line-height: inherit;
+  opacity: 0.55;
+  transition: none !important;
+}
+
+.filled.filled :global(.title) {
+  opacity: 0;
+}
+
+/* Значок карандаша показывает только пустое поле без фокуса: у строк списка такого значка нет. */
+.row :global(.edit-icon) {
+  display: none !important;
+}
+
+.row input {
+  opacity: 1 !important;
+}
