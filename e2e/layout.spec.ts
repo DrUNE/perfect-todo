@@ -75,3 +75,29 @@ test('does not shift the input and the list when toolbar buttons appear and disa
 
   expect(position(await input.boundingBox())).toEqual(position(inputBox));
 });
+
+test('does not clip the list shadow at the sides', async ({ page }) => {
+  await page.goto('/');
+  await newTodoInput(page).fill('Тень');
+  await newTodoInput(page).press('Enter');
+  await waitForAnimations(page);
+
+  // Обрезающий предок строки должен начинаться и заканчиваться за тенью списка, а не по его рамке.
+  const gaps = await todoRow(page, 'Тень').evaluate((row) => {
+    const rowBox = row.getBoundingClientRect();
+    let node = row.parentElement;
+
+    while (node && row.ownerDocument.defaultView?.getComputedStyle(node).overflowX !== 'clip') {
+      node = node.parentElement;
+    }
+
+    const clipBox = node?.getBoundingClientRect();
+
+    return clipBox
+      ? { left: rowBox.left - clipBox.left, right: clipBox.right - rowBox.right }
+      : null;
+  });
+
+  expect(gaps?.left).toBeGreaterThanOrEqual(16);
+  expect(gaps?.right).toBeGreaterThanOrEqual(16);
+});
