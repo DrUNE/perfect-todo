@@ -294,3 +294,42 @@ test('dragging a row with the mouse does not change its status', async ({ page }
 
   await expect(todoRow(page, 'Не тянуть')).toHaveAccessibleName('Не тянуть');
 });
+
+test('shows a text cursor over a row and a pointer over its buttons', async ({ page }) => {
+  await addTodo(page, 'Курсор');
+
+  const row = todoRow(page, 'Курсор');
+
+  await expect(row).toHaveCSS('cursor', 'text');
+  await expect(row.getByRole('button', { name: 'Отметить как сделанное' })).toHaveCSS(
+    'cursor',
+    'pointer',
+  );
+});
+
+test('the editor looks like the row itself: same size, no label and no focus frame', async ({
+  page,
+}) => {
+  await addTodo(page, 'Тот же вид');
+
+  const row = todoRow(page, 'Тот же вид');
+  const rowBox = await row.boundingBox();
+  const inputBox = await row.getByText('Тот же вид', { exact: true }).boundingBox();
+
+  await row.click();
+
+  const editor = page.locator('[data-todo-editor]');
+  const editInput = page.getByRole('textbox', { name: 'Название задачи' });
+
+  await expect(editInput).toBeFocused();
+  expect(await editor.boundingBox()).toMatchObject({ y: rowBox?.y, height: rowBox?.height });
+  // Текст остаётся на том же месте, виден только курсор: название поля не показывается, рамки фокуса нет.
+  expect(
+    Math.abs(((await editInput.boundingBox())?.x ?? 0) - (inputBox?.x ?? 0)),
+  ).toBeLessThanOrEqual(2);
+  await expect(editor.locator('.title')).not.toBeInViewport();
+  await expect(editor).toHaveCSS('outline-style', 'none');
+  expect(
+    await editInput.evaluate((input) => ('selectionStart' in input ? input.selectionStart : null)),
+  ).toBe('Тот же вид'.length);
+});

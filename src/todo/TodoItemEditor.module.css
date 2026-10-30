@@ -1,0 +1,28 @@
+/* Редактор выглядит как сама строка задачи: тот же текст на том же месте и только курсор ввода, без плавающего
+   заголовка, рамки фокуса и сдвига высоты. Стили Adwaita и inline-стили AdwEntryRow задают положение поля
+   и отступы напрямую, поэтому здесь нужен !important. */
+.editor {
+  min-height: 0;
+  box-shadow: none;
+  outline: none !important;
+}
+
+/* Имя поля остаётся для скринридеров (aria-labelledby), но не показывается. */
+.editor :global(.title) {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.editor :global(.editable-area) > div {
+  padding-bottom: 0 !important;
+}
+
+.editor input {
+  position: static !important;
+  height: auto !important;
+  padding: 0 !important;
+  line-height: inherit;
+}
