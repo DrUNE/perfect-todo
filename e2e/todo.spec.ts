@@ -333,3 +333,22 @@ test('the editor looks like the row itself: same size, no label and no focus fra
     await editInput.evaluate((input) => ('selectionStart' in input ? input.selectionStart : null)),
   ).toBe('Тот же вид'.length);
 });
+
+test('a completed todo is shown in italics with a less contrasting text', async ({ page }) => {
+  await addTodo(page, 'Сделано');
+
+  const title = todoRow(page, 'Сделано').getByText('Сделано', { exact: true });
+
+  await expect(title).toHaveCSS('font-style', 'normal');
+
+  const activeColor = await title.evaluate(
+    (element) => element.ownerDocument.defaultView?.getComputedStyle(element).color,
+  );
+
+  await markDone(page, 'Сделано');
+
+  await expect(title).toHaveCSS('font-style', 'italic');
+  // Зачёркивание остаётся: статус не должен передаваться только курсивом и цветом.
+  await expect(title).toHaveCSS('text-decoration-line', 'line-through');
+  await expect(title).not.toHaveCSS('color', activeColor);
+});

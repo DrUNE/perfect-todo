@@ -49,7 +49,7 @@ export function TodoItem({
 
   return (
     <AdwActionRow
-      className={styles.item}
+      className={todo.isComplete ? `${styles.item} ${styles.done}` : styles.item}
       data-todo-id={todo.id}
       tabIndex={isTabStop ? 0 : -1}
       // Состояние выполнено передаётся не только зачёркиванием, но и именем строки.
