@@ -1,10 +1,12 @@
 import { AdwaitaProvider, AdwHeaderBar } from '@gtk-js/adwaita';
 import { useEffect } from 'react';
+import { cx } from '@/shared/cx';
 import { ThemeSwitcher } from '@/theme/ThemeSwitcher';
 import { useDeviceInfo } from '@/shared/useDeviceInfo';
 import { useResolvedTheme } from '@/theme/themeStore';
 import { ShortcutsHelp } from '@/todo/ShortcutsHelp';
 import { TodoPage } from '@/todo/TodoPage';
+import styles from './App.module.css';
 
 export function App() {
   const resolvedTheme = useResolvedTheme();
@@ -28,7 +30,7 @@ export function App() {
   return (
     <AdwaitaProvider colorScheme={resolvedTheme}>
       <AdwHeaderBar
-        className="flat"
+        className={cx('flat', styles.header)}
         showStartTitleButtons={false}
         showEndTitleButtons={false}
         showTitle={false}

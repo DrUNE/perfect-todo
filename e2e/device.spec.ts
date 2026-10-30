@@ -56,6 +56,23 @@ test.describe('desktop with mouse', () => {
 test.describe('touch-only mobile device', () => {
   test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
 
+  test('has no horizontal scroll: the layout viewport is as wide as the screen', async ({
+    page,
+  }) => {
+    await page.goto('/');
+
+    const html = page.locator('html');
+    const overflow = () => html.evaluate((element) => element.scrollWidth - element.clientWidth);
+
+    expect(await overflow()).toBe(0);
+
+    await addTodo(page, 'Задача');
+    await addTodo(page, 'Вторая');
+    await todoRow(page, 'Задача').tap();
+    await expect(page.getByRole('textbox', { name: 'Название задачи' })).toBeFocused();
+    expect(await overflow()).toBe(0);
+  });
+
   test('is detected as a mobile touch screen', async ({ page }) => {
     await page.goto('/');
 

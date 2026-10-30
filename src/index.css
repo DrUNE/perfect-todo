@@ -69,7 +69,6 @@
     min-height: 100dvh;
     background-color: var(--window-bg-color);
     color: var(--window-fg-color);
-    overflow-x: hidden; /* заголовок Adwaita выходит за край окна на 1px (margin -1px) */
   }
 
   #root {
