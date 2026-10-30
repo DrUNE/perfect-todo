@@ -36,8 +36,6 @@ test('edits a todo title', async ({ page }) => {
     name: 'Редактировать задачу',
   });
 
-  await page.getByText('Старое название', { exact: true }).hover();
-  await expect(editButton).toHaveCSS('opacity', '1');
   await editButton.click();
 
   const editInput = page.getByRole('textbox', { name: 'Название задачи' });
@@ -53,7 +51,6 @@ test('edits a todo title', async ({ page }) => {
 
 test('cancels editing with Escape without changing the todo', async ({ page }) => {
   await addTodo(page, 'Исходное название');
-  await page.getByText('Исходное название', { exact: true }).hover();
   await page.getByRole('button', { name: 'Редактировать задачу' }).click();
 
   const input = page.getByRole('textbox', { name: 'Название задачи' });

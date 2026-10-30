@@ -1,4 +1,4 @@
-import { Button } from 'antd';
+import { GtkButton } from '@gtk-js/adwaita';
 import { useTodoList } from '@/entities/todo/model';
 import { clearCompletedTodos } from '../model';
 
@@ -10,8 +10,10 @@ export function ClearCompletedButton() {
   }
 
   return (
-    <Button danger onClick={clearCompletedTodos}>
-      Удалить завершённые
-    </Button>
+    <GtkButton
+      className="destructive-action"
+      label="Удалить завершённые"
+      onClicked={clearCompletedTodos}
+    />
   );
 }

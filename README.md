@@ -1,6 +1,6 @@
 # Zustand Lessons
 
-Учебное frontend-приложение для практики **Zustand**, **React**, **TypeScript**, **Ant Design** и **Panda CSS** на примере списка задач.
+Учебное frontend-приложение для практики **Zustand**, **React**, **TypeScript**, **GTK Adwaita** (`@gtk-js/adwaita`) на примере списка задач.
 
 Проект демонстрирует разделение кода на `app`, `pages`, `features` и `entities`, работу с глобальным состоянием без API, модульные тесты через Vitest и E2E-тесты через Playwright.
 
@@ -20,8 +20,7 @@
 - React 19 и TypeScript 7;
 - Vite 8 с HMR и sourcemaps в dev-режиме;
 - Zustand 5;
-- Ant Design 6;
-- Panda CSS 2;
+- GTK Adwaita для React (`@gtk-js/adwaita`, `@gtk-js/icons-adwaita`);
 - Vitest 5 и Playwright.
 
 ## Требования
@@ -39,15 +38,7 @@ npm run dev
 
 Открой адрес из терминала, обычно `http://localhost:5173`.
 
-При установке зависимостей автоматически выполняется `npm run prepare`, который создаёт каталог `styled-system` для Panda CSS. Если генерацию нужно повторить вручную:
-
-```bash
-npm run prepare
-```
-
-Каталог `styled-system/` генерируется автоматически, не редактируется вручную и не хранится в Git.
-
-Vite обновляет приложение при изменении исходников. Плагин Panda следит за стилями в `src` и обновляет сгенерированный CSS; отдельный watcher запускать не нужно.
+Vite обновляет приложение при изменении исходников. Отдельный watcher запускать не нужно.
 
 ## Работа с интерфейсом
 
@@ -79,17 +70,14 @@ src/
     model/                # типы и Zustand-store
     ui/TodoItem/          # отображение одной задачи
   main.tsx                # точка входа
-  index.css               # Ant Design reset и порядок cascade layers
-panda.config.ts           # presets и глобальные стили Panda
-vite.config.ts            # Vite, Panda, Vitest и алиасы
+vite.config.ts            # Vite, Vitest и алиасы
 playwright.config.ts      # конфигурация E2E-тестов
 e2e/                      # пользовательские сценарии Playwright
-styled-system/            # сгенерированные Panda helpers и типы
 ```
 
-Импорты исходного кода выполняются через алиас `@/`, например `@/entities/todo/model`. Сгенерированные Panda helpers импортируются через `@styled-system/...`.
+Импорты исходного кода выполняются через алиас `@/`, например `@/entities/todo/model`.
 
-Стили пишутся через `css`/`cx` и patterns Panda, а не через CSS Modules. Глобальные стили находятся в `panda.config.ts`. Panda Preflight отключён, базовый reset подключается из `antd/dist/reset.css` в слое `reset` в `src/index.css`.
+Интерфейс собран из компонентов GTK Adwaita (`AdwaitaProvider`, `AdwToolbarView`, `AdwPreferencesGroup`, `AdwActionRow`, `GtkEntry` и др.); тема и цвета задаются провайдером, собственных стилей нет.
 
 ## Команды
 
@@ -105,42 +93,12 @@ styled-system/            # сгенерированные Panda helpers и ти
 | `npm run test:run`         | однократный запуск unit-тестов          |
 | `npm run test:e2e:install` | установка Chromium для Playwright       |
 | `npm run test:e2e`         | запуск E2E-тестов                       |
-| `npm run prepare`          | генерация `styled-system`               |
 
 ## Дебаг в Chrome DevTools
 
 ### Исходный код
 
 В dev-режиме Vite предоставляет sourcemaps для TypeScript/TSX. Во вкладке **Sources** найди исходники через **Page** или `Ctrl+P` / `Cmd+P`, например `TodoPage.tsx`. Можно ставить breakpoints, проверять состояние и пошагово выполнять код.
-
-### CSS и Panda
-
-Для dev-сервера включён `css.devSourcemap`. В **Elements → Styles** правила Panda находятся в cascade layers:
-
-- `utilities` — стили из `css()` и patterns;
-- `base` — глобальные стили из `panda.config.ts`;
-- `reset` — базовый reset Ant Design;
-- `tokens` — design tokens.
-
-Sourcemap ведёт к **сгенерированному CSS**, а не к конкретному объекту `css({...})` в TSX. Чтобы найти исходный стиль, ищи в проекте соответствующее свойство или значение, например `line-through` или `gap: '16px'`.
-
-Изменения в DevTools временные: после проверки их нужно вручную перенести в исходный код.
-
-### Диагностика Panda
-
-Разово посмотреть, какие стили Panda извлекла из конкретного компонента:
-
-```bash
-npx panda debug --include "src/entities/todo/ui/TodoItem/**"
-```
-
-Результаты сохраняются в `styled-system/debug/`, включая значения вызовов и их исходные позиции. Команда не работает в watch-режиме — после изменений её нужно запустить повторно.
-
-Вывод в терминал без создания debug-файлов:
-
-```bash
-npx panda debug --dry --include "src/entities/todo/ui/TodoItem/**"
-```
 
 ## Тесты и отладка сценариев
 

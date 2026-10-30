@@ -1,6 +1,5 @@
-import { Input, type InputRef } from 'antd';
-import { useEffect, useRef, type FormEvent, type KeyboardEvent } from 'react';
-import { flex } from '@styled-system/patterns';
+import { GtkEntry } from '@gtk-js/adwaita';
+import { useEffect, useRef, type KeyboardEvent } from 'react';
 
 type AddTodoFormProps = {
   value: string;
@@ -17,17 +16,16 @@ export function AddTodoForm({
   onSubmit,
   onCancelEdit,
 }: AddTodoFormProps) {
-  const inputRef = useRef<InputRef>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (isEditing) {
-      inputRef.current?.focus({ cursor: 'all' });
+      inputRef.current?.focus();
+      inputRef.current?.select();
     }
   }, [isEditing]);
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
+  const handleActivate = () => {
     if (value.trim()) {
       onSubmit();
     }
@@ -41,17 +39,17 @@ export function AddTodoForm({
   };
 
   return (
-    <form className={flex({ width: '100%', gap: '8px' })} onSubmit={handleSubmit}>
-      <Input
-        ref={inputRef}
-        aria-label="Название задачи"
-        placeholder={
-          isEditing ? 'Enter для сохранения, Esc для отмены' : 'Новая задача, Enter для добавления'
-        }
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
-        onKeyDown={handleKeyDown}
-      />
-    </form>
+    <GtkEntry
+      ref={inputRef}
+      hexpand
+      aria-label="Название задачи"
+      placeholderText={
+        isEditing ? 'Enter для сохранения, Esc для отмены' : 'Новая задача, Enter для добавления'
+      }
+      text={value}
+      onChanged={onChange}
+      onActivate={handleActivate}
+      onKeyDown={handleKeyDown}
+    />
   );
 }

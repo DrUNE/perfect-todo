@@ -4,7 +4,7 @@
 
 - Учебный frontend-проект для изучения Zustand и современных практик разработки.
 - Главная цель пользователя — поддерживаемая, предсказуемая и масштабируемая кодовая база без преждевременного усложнения.
-- Стек: React 19, TypeScript 7, Vite 8, Zustand 5, Ant Design 6, Panda CSS 2. React Router 7 установлен, но пока не используется в исходниках.
+- Стек: React 19, TypeScript 7, Vite 8, Zustand 5, GTK Adwaita для React (`@gtk-js/adwaita`). React Router 7 установлен, но пока не используется в исходниках.
 - Проект небольшой: основной пример — список задач через Zustand. Не переносить шаблонные или крупные архитектурные решения без реальной необходимости.
 - Основной язык общения с пользователем — русский.
 
@@ -17,10 +17,10 @@
 - `src/features/todo-toggle/model/` — сценарий переключения состояния задачи.
 - `src/features/todo-edit/model/` — сценарий обновления названия задачи; состояние редактирования и значение общего input управляются страницей.
 - `src/features/todo-clear-completed/` — сценарий и кнопка удаления всех завершённых задач; кнопка скрыта, если завершённых задач нет.
-- `src/features/theme-switch/` — трёхпозиционный переключатель темы (светлая/браузер/тёмная). Выбор сохраняется в Zustand persist/localStorage, системная тема отслеживается через `matchMedia`, Ant Design использует `defaultAlgorithm`/`darkAlgorithm`. Фон приложения задаётся из токена `colorBgLayout` через `theme.useToken()`, а `html[data-theme]` управляет остальными глобальными цветами Panda.
+- `src/features/theme-switch/` — трёхпозиционный переключатель темы (светлая/браузер/тёмная). Выбор сохраняется в Zustand persist/localStorage, системная тема отслеживается через `matchMedia`; `AdwaitaProvider` получает `colorScheme` из вычисленной темы, `html[data-theme]` выставляется в `App`.
 - `src/entities/todo/model/` — типы и Zustand-store задач.
 - `src/entities/todo/ui/TodoItem/` — отображение отдельной задачи; UI получает действие через callback и не зависит от feature.
-- `panda.config.ts` — presets и глобальные стили Panda; Panda Preflight отключён. `src/index.css` подключает `antd/dist/reset.css` в слой `reset` и задаёт порядок остальных cascade layers. CSS Modules удалены, локальные стили описываются через `@styled-system/css` и `@styled-system/patterns`.
+- Стили и тема приходят из `@gtk-js/adwaita` (`AdwaitaProvider` в `App`); Ant Design, Panda CSS и CSS Modules удалены, собственного CSS в проекте нет. Иконки задаются PascalCase-именами из `@gtk-js/icons-adwaita` (`DocumentEdit`, `WeatherClear`).
 - `public/` — статические файлы, доступные по URL от корня; сейчас там только `favicon.svg`.
 - Unit-тесты запускаются через Vitest 5 в Node-окружении и используют общий `vite.config.ts`, включая алиас `@/`. Примеры тестов находятся рядом с моделями в `entities/todo/model` и `features/todo-*/model`.
 - E2E-тесты находятся в `e2e/` и запускаются через Playwright в Chromium. `playwright.config.ts` автоматически поднимает Vite на `127.0.0.1:5173`; браузеры устанавливаются локально в `node_modules` через `PLAYWRIGHT_BROWSERS_PATH=0`, поэтому после `npm ci` нужно повторить `npm run test:e2e:install`.
@@ -29,7 +29,6 @@
 ## Команды
 
 ```bash
-npm run prepare         # генерация styled-system; также запускается автоматически после npm install
 npm run dev             # dev-сервер Vite
 npm run build      # TypeScript project references + production build
 npm run lint       # Oxlint
@@ -85,7 +84,7 @@ src/
 - Держать типы рядом с принадлежащим им модулем. Общие типы выносить только при реальном совместном использовании.
 - Избегать `any`, небезопасных приведений и `@ts-ignore`; на внешних границах валидировать неизвестные данные и сужать `unknown`.
 - Для импортов только типов использовать `import type`. Не подавлять ошибки TypeScript ради успешной сборки.
-- Для абсолютных импортов из `src` использовать алиас `@/...`: `@/*` сопоставлен с `src/*` одновременно в `tsconfig.app.json` и `vite.config.ts`. Сгенерированные Panda helpers импортировать через `@styled-system/...`; этот алиас также настроен в обеих конфигурациях. При изменении алиасов обновлять обе конфигурации.
+- Для абсолютных импортов из `src` использовать алиас `@/...`: `@/*` сопоставлен с `src/*` одновременно в `tsconfig.app.json` и `vite.config.ts`. При изменении алиаса обновлять обе конфигурации.
 - Предпочитать именные экспорты для новых модулей, кроме мест, где default export является принятой точкой входа. Не менять существующие экспорты без необходимости.
 
 ## Zustand
@@ -100,9 +99,8 @@ src/
 
 ## UI, стили и доступность
 
-- Стили писать только через Panda CSS: `css`/`cx` из `@styled-system/css` и `flex` или другие patterns из `@styled-system/patterns`. Не возвращать CSS Modules и inline-объекты `style` без необходимости.
-- Глобальные стили настраивать в `panda.config.ts`; Panda Preflight не включать, базовый reset предоставляет `antd/dist/reset.css`. `src/index.css` использовать только для объявления порядка cascade layers и подключения reset в слой `reset`, чтобы он не перекрывал стили Ant Design и Panda. Каталог `styled-system/` генерируется через `npm run prepare` и не редактируется вручную, он добавлен в `.gitignore`.
-- Не дублировать готовые возможности Ant Design собственными сложными контролами. При внедрении Ant Design тему и общие настройки задавать централизованно через provider.
+- Интерфейс строить из компонентов `@gtk-js/adwaita` (`Adw*`, `Gtk*`) и их style-классов (например `destructive-action`, `circular`); тему задавать централизованно через `AdwaitaProvider`. Не добавлять собственный CSS без необходимости. Текст пользователя в `AdwActionRow` выводить с `useMarkup={false}` или экранировать.
+- Не дублировать готовые возможности Adwaita собственными сложными контролами.
 - Интерактивные элементы должны быть доступны с клавиатуры, иметь видимый focus и понятное accessible name. Использовать семантический HTML вместо кликабельных `div`.
 - У кнопок внутри форм явно задавать `type`; изображениям давать осмысленный `alt`, декоративным — пустой `alt`.
 - Учитывать responsive layout, переполнение длинным текстом, состояния hover/focus/disabled/loading/error и reduced motion там, где появляется анимация.

@@ -1,7 +1,4 @@
-import { EditOutlined } from '@ant-design/icons';
-import { Button, Card, Checkbox, type CheckboxChangeEvent } from 'antd';
-import { css, cx } from '@styled-system/css';
-import { flex } from '@styled-system/patterns';
+import { AdwActionRow, GtkButton, GtkCheckButton } from '@gtk-js/adwaita';
 import type { Todo } from '../../model';
 
 type TodoItemProps = {
@@ -10,36 +7,40 @@ type TodoItemProps = {
   onEdit?: () => void;
 };
 
+const escapeMarkup = (text: string) =>
+  text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
 export function TodoItem({ todo, onToggle, onEdit }: TodoItemProps) {
-  const handleChange = (event: CheckboxChangeEvent) => {
-    if (event.target.checked !== todo.isComplete) {
+  const handleToggled = (isActive: boolean) => {
+    if (isActive !== todo.isComplete) {
       onToggle?.(todo.id);
     }
   };
 
   return (
-    <Card className={cx('group', css({ width: '100%' }))}>
-      <div className={flex({ align: 'center', justify: 'space-between', gap: '8px' })}>
-        <Checkbox checked={todo.isComplete} onChange={handleChange}>
-          <span className={todo.isComplete ? css({ textDecoration: 'line-through' }) : undefined}>
-            {todo.title}
-          </span>
-        </Checkbox>
-        {onEdit && (
-          <Button
-            className={css({
-              flexShrink: 0,
-              opacity: { base: 0, _groupHover: 1, _focusVisible: 1 },
-              '@media (hover: none)': { opacity: 1 },
-            })}
-            type="text"
-            shape="circle"
-            icon={<EditOutlined />}
+    <AdwActionRow
+      title={todo.isComplete ? `<s>${escapeMarkup(todo.title)}</s>` : todo.title}
+      useMarkup={todo.isComplete}
+      prefixWidget={
+        <GtkCheckButton
+          valign="center"
+          aria-label={todo.title}
+          active={todo.isComplete}
+          onToggled={handleToggled}
+        />
+      }
+      suffixWidget={
+        onEdit && (
+          <GtkButton
+            valign="center"
+            className="circular"
+            hasFrame={false}
+            iconName="DocumentEdit"
             aria-label="Редактировать задачу"
-            onClick={onEdit}
+            onClicked={onEdit}
           />
-        )}
-      </div>
-    </Card>
+        )
+      }
+    />
   );
 }
