@@ -1,5 +1,6 @@
 import { AdwActionRow, AdwDialog, AdwPreferencesGroup, GtkButton, GtkLabel } from '@gtk-js/adwaita';
 import { useEffect, useEffectEvent, useState } from 'react';
+import { useDeviceInfo } from '@/shared/useDeviceInfo';
 
 type Shortcut = { action: string; keys: string };
 
@@ -45,6 +46,9 @@ const isEditableTarget = (target: EventTarget | null) =>
 // Кнопка в шапке и диалог со списком горячих клавиш. Диалог открывается также клавишей «?».
 export function ShortcutsHelp() {
   const [isOpen, setIsOpen] = useState(false);
+  const { hasTouch, hasMouse } = useDeviceInfo();
+  // На устройстве только с касаниями клавиатуры, скорее всего, нет: кнопку не показываем (клавиша «?» работает).
+  const showButton = !hasTouch || hasMouse;
 
   const handleDocumentKeyDown = useEffectEvent((event: KeyboardEvent) => {
     if (event.key === '?' && !event.ctrlKey && !event.altKey && !isEditableTarget(event.target)) {
@@ -63,13 +67,15 @@ export function ShortcutsHelp() {
 
   return (
     <>
-      <GtkButton
-        className="circular"
-        iconName="InputKeyboard"
-        aria-label="Горячие клавиши"
-        tooltipText="Горячие клавиши (?)"
-        onClicked={() => setIsOpen(true)}
-      />
+      {showButton && (
+        <GtkButton
+          className="circular"
+          iconName="InputKeyboard"
+          aria-label="Горячие клавиши"
+          tooltipText="Горячие клавиши (?)"
+          onClicked={() => setIsOpen(true)}
+        />
+      )}
       <AdwDialog
         title="Горячие клавиши"
         visible={isOpen}

@@ -2,6 +2,10 @@ import { expect, test, type Page } from '@playwright/test';
 
 const newTodoInput = (page: Page) => page.getByRole('textbox', { name: 'Новая задача' });
 
+// Ждём окончания анимаций (в том числе View Transition), чтобы измерять итоговое положение элементов.
+const waitForAnimations = (page: Page) =>
+  page.waitForFunction('document.getAnimations().length === 0');
+
 const addTodo = async (page: Page, title: string) => {
   await newTodoInput(page).fill(title);
   await newTodoInput(page).press('Enter');
@@ -30,6 +34,20 @@ test.describe('desktop with mouse', () => {
     await expect(html).toHaveAttribute('data-mobile', 'false');
   });
 
+  test('keeps the toolbar above the new todo row and shows the shortcuts button', async ({
+    page,
+  }) => {
+    await page.goto('/');
+    await addTodo(page, 'Задача');
+    await page.getByRole('checkbox', { name: 'Задача' }).check();
+
+    const clear = await page.getByRole('button', { name: 'Удалить завершённые' }).boundingBox();
+    const input = await newTodoInput(page).boundingBox();
+
+    expect(clear?.y).toBeLessThan(input?.y ?? 0);
+    await expect(page.getByRole('button', { name: 'Горячие клавиши' })).toBeVisible();
+  });
+
   test('has no confirm and cancel buttons while typing a new todo', async ({ page }) => {
     await page.goto('/');
     await newTodoInput(page).fill('Черновик');
@@ -51,6 +69,40 @@ test.describe('touch-only mobile device', () => {
     await expect(html).toHaveAttribute('data-compact', 'true');
     await expect(html).toHaveAttribute('data-touch', 'true');
     await expect(html).toHaveAttribute('data-mouse', 'false');
+  });
+
+  test('puts the toolbar at the bottom of the screen, within thumb reach', async ({ page }) => {
+    await page.goto('/');
+    await addTodo(page, 'Задача');
+    await waitForAnimations(page);
+
+    const input = newTodoInput(page);
+    const initialBox = await input.boundingBox();
+
+    await page.getByRole('checkbox', { name: 'Задача' }).tap();
+
+    const clear = page.getByRole('button', { name: 'Удалить завершённые' });
+    const clearBox = await clear.boundingBox();
+    const viewportHeight = page.viewportSize()?.height ?? 0;
+
+    await expect(clear).toBeVisible();
+    // Кнопка у нижнего края окна и ниже всех строк, а поле ввода и список не сдвинулись.
+    expect((clearBox?.y ?? 0) + (clearBox?.height ?? 0)).toBeGreaterThan(viewportHeight - 60);
+    expect(clearBox?.y).toBeGreaterThan((initialBox?.y ?? 0) + (initialBox?.height ?? 0));
+    expect(await input.boundingBox()).toMatchObject({ y: initialBox?.y });
+
+    await clear.tap();
+
+    await expect(page.getByRole('checkbox')).toHaveCount(0);
+    await expect(page.getByText('Удалено задач: 1')).toBeVisible();
+    await waitForAnimations(page);
+    expect(await input.boundingBox()).toMatchObject({ y: initialBox?.y });
+  });
+
+  test('does not show the shortcuts button and keyboard hints', async ({ page }) => {
+    await page.goto('/');
+
+    await expect(page.getByRole('button', { name: 'Горячие клавиши' })).toHaveCount(0);
   });
 
   test('does not show keyboard shortcut hints', async ({ page }) => {

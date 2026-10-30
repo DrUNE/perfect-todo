@@ -134,7 +134,7 @@ test('removes only completed todos and offers to undo', async ({ page }) => {
   await expect(page.getByRole('checkbox', { name: 'Активная задача' })).toBeVisible();
   await expect(page.getByText('Завершённая задача', { exact: true })).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Удалить завершённые' })).toHaveCount(0);
-  await expect(page.getByText('Удалено завершённых задач: 1')).toBeVisible();
+  await expect(page.getByText('Удалено задач: 1')).toBeVisible();
 
   await page.getByRole('button', { name: 'Отменить' }).click();
 

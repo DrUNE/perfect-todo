@@ -1,5 +1,6 @@
 import { AdwClamp, AdwToastOverlay, type AdwToastOverlayRef } from '@gtk-js/adwaita';
 import { useEffect, useEffectEvent, useRef, useState } from 'react';
+import { useDeviceInfo } from '@/shared/useDeviceInfo';
 import { withViewTransition } from '@/shared/withViewTransition';
 import { NewTodoRow } from './NewTodoRow';
 import styles from './TodoPage.module.css';
@@ -18,6 +19,9 @@ export function TodoPage() {
   const toastRef = useRef<AdwToastOverlayRef>(null);
   const newTodoRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
+  const { hasTouch, hasMouse } = useDeviceInfo();
+  // Только касания: панель кнопок внизу, где до неё проще дотянуться пальцем; с мышью — над строкой ввода.
+  const isTouchOnly = hasTouch && !hasMouse;
   const [announcement, setAnnouncement] = useState<Announcement>({ id: 0, message: '' });
 
   // Каждое сообщение — новый элемент, чтобы скринридер озвучил и повторяющийся текст.
@@ -76,7 +80,7 @@ export function TodoPage() {
 
     withViewTransition(() => clearCompletedTodos(), restoreLostFocus);
     toastRef.current?.addToast({
-      title: `Удалено завершённых задач: ${count}`,
+      title: `Удалено задач: ${count}`,
       buttonLabel: 'Отменить',
       timeout: 6,
       onButtonClicked: undo,
@@ -109,11 +113,11 @@ export function TodoPage() {
   return (
     <>
       <AdwClamp maximumSize={400}>
-        <div className={styles.content}>
+        <div className={isTouchOnly ? styles.contentWithBottomBar : styles.content}>
           <div className={styles.stickyBar}>
             <div aria-hidden className={styles.fade} />
             <div className={styles.stickyContent}>
-              <TodoToolbar onClearCompleted={clearCompleted} />
+              {!isTouchOnly && <TodoToolbar placement="top" onClearCompleted={clearCompleted} />}
               <div ref={newTodoRef} data-new-todo className={styles.input}>
                 <NewTodoRow
                   onNavigateDown={focusList}
@@ -125,11 +129,16 @@ export function TodoPage() {
           <div ref={listRef}>
             <TodoList onDelete={deleteWithUndo} onNavigateUp={focusNewTodo} announce={announce} />
           </div>
+          {isTouchOnly && <TodoToolbar placement="bottom" onClearCompleted={clearCompleted} />}
         </div>
       </AdwClamp>
       <AdwToastOverlay
         toastRef={toastRef}
-        style={{ position: 'fixed', inset: '0 0 40px', pointerEvents: 'none' }}
+        style={{
+          position: 'fixed',
+          inset: isTouchOnly ? '0 0 58px' : '0 0 40px',
+          pointerEvents: 'none',
+        }}
       />
       <ShortcutHints />
       <div role="status" aria-live="polite" className={styles.visuallyHidden}>
