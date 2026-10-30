@@ -5,6 +5,8 @@ import { defineConfig } from 'vite';
 
 // https://vite.dev/config/
 export default defineConfig(({ command }) => ({
+  // На GitHub Pages сайт живёт в подпути (/<репозиторий>/), путь передаёт workflow через BASE_PATH.
+  base: process.env.BASE_PATH ?? '/',
   plugins: [react()],
   css: {
     devSourcemap: command === 'serve',

@@ -1,4 +1,4 @@
-# Zustand Lessons
+# Идеальное TODO
 
 Учебное frontend-приложение для практики **Zustand**, **React**, **TypeScript**, **GTK Adwaita** (`@gtk-js/adwaita`) на примере списка задач.
 
@@ -136,6 +136,22 @@ npx playwright show-report
 ```bash
 npx playwright show-trace test-results/<имя-каталога-теста>/trace.zip
 ```
+
+## Деплой на GitHub Pages
+
+Workflow `.github/workflows/deploy.yml` собирает приложение и публикует его на GitHub Pages. Он запускается при push в `main` и вручную: **Actions → Deploy to GitHub Pages → Run workflow**.
+
+Перед первым запуском в репозитории включи **Settings → Pages → Build and deployment → Source: GitHub Actions**.
+
+Перед публикацией workflow выполняет `npm run lint`, `npm run fmt:check` и `npm run test:run`; если проверка падает, деплой не происходит. E2E-тесты в workflow не входят.
+
+Сайт открывается по адресу `https://<пользователь>.github.io/<репозиторий>/`. Путь передаётся в сборку через переменную `BASE_PATH`; локально её можно указать, чтобы проверить сборку по подпути:
+
+```bash
+BASE_PATH=/perfect-todo/ npm run build && BASE_PATH=/perfect-todo/ npm run preview
+```
+
+Все проекты одного пользователя на `github.io` делят один origin и один `localStorage`, поэтому ключи `todo-list` и `todo-theme-preference` могут пересечься с другими приложениями.
 
 ## Проверка перед завершением изменений
 
