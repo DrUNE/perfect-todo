@@ -53,6 +53,8 @@ export function TodoItem({
 
   return (
     <AdwActionRow
+      // Состояния hover и нажатия Adwaita, как у строки новой задачи.
+      activatable
       className={cx(styles.item, todo.isComplete && styles.done)}
       data-todo-id={todo.id}
       tabIndex={isTabStop ? 0 : -1}

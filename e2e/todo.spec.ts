@@ -1,5 +1,13 @@
 import { expect, test } from '@playwright/test';
-import { addTodo, doneSuffix, markDone, newTodoInput, todoRow, todoRows } from './helpers.js';
+import {
+  addTodo,
+  doneSuffix,
+  markDone,
+  newTodoInput,
+  todoRow,
+  todoRows,
+  waitForAnimations,
+} from './helpers.js';
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/');
@@ -382,4 +390,34 @@ test('the new todo row looks like a list row: same height, no floating label, no
   // При вводе название пропадает, остаётся только текст.
   await input.fill('Печатаю');
   await expect(label).toHaveCSS('opacity', '0');
+});
+
+test('a todo row gets the same hover background as the new todo row', async ({ page }) => {
+  await addTodo(page, 'Наведение');
+
+  const background = (selector: string) =>
+    page
+      .locator(selector)
+      .first()
+      .evaluate((el) => el.ownerDocument.defaultView?.getComputedStyle(el).backgroundColor);
+  const row = todoRow(page, 'Наведение');
+
+  // Строка новой задачи в фокусе не подсвечивается при наведении.
+  await newTodoInput(page).evaluate((input) => input.blur());
+  await page.mouse.move(0, 0);
+  await waitForAnimations(page);
+
+  const idle = await background('.gtk-row.entry');
+
+  await page.locator('.gtk-row.entry').first().hover();
+  await waitForAnimations(page);
+
+  const newRowHover = await background('.gtk-row.entry');
+
+  expect(newRowHover).not.toBe(idle);
+
+  await row.hover();
+  await waitForAnimations(page);
+
+  expect(await background('[data-todo-id]')).toBe(newRowHover);
 });

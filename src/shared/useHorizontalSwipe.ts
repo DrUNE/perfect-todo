@@ -13,7 +13,8 @@ const MAX_OFFSET = 120;
 /**
  * Горизонтальный свайп по элементу пальцем или пером (мышью жест не срабатывает).
  * Элемент смещается за пальцем; после порога жест вызывает `onSwipe`, иначе элемент возвращается на место.
- * Нужен `touch-action: pan-y` у элемента, чтобы вертикальная прокрутка страницы продолжала работать.
+ * Нужен `touch-action: pan-y` у элемента, чтобы вертикальная прокрутка страницы продолжала работать, и
+ * `transition: transform` в его CSS, чтобы возврат на место был плавным.
  */
 export const useHorizontalSwipe = ({ threshold = 72, onSwipe }: UseHorizontalSwipeOptions) => {
   const [offset, setOffset] = useState(0);
@@ -108,7 +109,8 @@ export const useHorizontalSwipe = ({ threshold = 72, onSwipe }: UseHorizontalSwi
   const style: CSSProperties & Record<'--swipe-progress', number> = {
     '--swipe-progress': Math.min(Math.abs(offset) / threshold, 1),
     transform: offset === 0 ? undefined : `translateX(${offset}px)`,
-    transition: isSwiping ? 'none' : 'transform 150ms ease',
+    // Во время жеста строка следует за пальцем без анимации; возврат на место анимирует CSS элемента.
+    transition: isSwiping ? 'none' : undefined,
   };
 
   return {
