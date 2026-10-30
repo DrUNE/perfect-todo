@@ -2,7 +2,7 @@
 
 Учебное frontend-приложение для практики **Zustand**, **React**, **TypeScript**, **GTK Adwaita** (`@gtk-js/adwaita`) на примере списка задач.
 
-Проект демонстрирует разделение кода на `app`, `pages`, `features` и `entities`, работу с глобальным состоянием без API, модульные тесты через Vitest и E2E-тесты через Playwright.
+Проект демонстрирует простую структуру `app` + модули `todo` и `theme`, работу с глобальным состоянием без API, модульные тесты через Vitest и E2E-тесты через Playwright.
 
 ## Возможности
 
@@ -58,24 +58,16 @@ Vite обновляет приложение при изменении исхо�
 
 ```text
 src/
-  app/                    # корневая композиция приложения
-  pages/todo-page/        # страница и координация сценариев
-  features/
-    todo-add/             # добавление и общий input для создания/редактирования
-    todo-edit/            # обновление названия задачи
-    todo-toggle/          # переключение статуса задачи
-    todo-clear-completed/ # удаление завершённых задач
-    theme-switch/         # выбор и сохранение темы приложения
-  entities/todo/
-    model/                # типы и Zustand-store
-    ui/TodoItem/          # отображение одной задачи
+  app/                    # AdwaitaProvider, шапка и композиция приложения
+  todo/                   # Zustand-store и действия задач, страница и UI задач, тесты
+  theme/                  # выбор и сохранение темы приложения
   main.tsx                # точка входа
 vite.config.ts            # Vite, Vitest и алиасы
 playwright.config.ts      # конфигурация E2E-тестов
 e2e/                      # пользовательские сценарии Playwright
 ```
 
-Импорты исходного кода выполняются через алиас `@/`, например `@/entities/todo/model`.
+Импорты исходного кода выполняются через алиас `@/`, например `@/todo/todoStore`.
 
 Интерфейс собран из компонентов GTK Adwaita (`AdwaitaProvider`, `AdwToolbarView`, `AdwPreferencesGroup`, `AdwActionRow`, `GtkEntry` и др.); тема и цвета задаются провайдером, собственных стилей нет.
 

@@ -1,5 +1,6 @@
 import { AdwToggleGroup, GtkImage } from '@gtk-js/adwaita';
-import { setThemePreference, useThemePreference, type ThemePreference } from '../model';
+import type { ThemePreference } from './theme';
+import { setThemePreference, useThemePreference } from './themeStore';
 
 const options = [
   { name: 'light', iconName: 'WeatherClear', title: 'Светлая тема' },

@@ -1,7 +1,8 @@
-import { AdwaitaProvider } from '@gtk-js/adwaita';
+import { AdwaitaProvider, AdwHeaderBar, AdwToolbarView } from '@gtk-js/adwaita';
 import { useEffect } from 'react';
-import { useResolvedTheme } from '@/features/theme-switch/model';
-import { TodoPage } from '@/pages/todo-page';
+import { ThemeSwitcher } from '@/theme/ThemeSwitcher';
+import { useResolvedTheme } from '@/theme/themeStore';
+import { TodoPage } from '@/todo/TodoPage';
 
 export function App() {
   const resolvedTheme = useResolvedTheme();
@@ -13,7 +14,18 @@ export function App() {
 
   return (
     <AdwaitaProvider colorScheme={resolvedTheme}>
-      <TodoPage />
+      <AdwToolbarView
+        style={{ minHeight: '100dvh' }}
+        topBars={
+          <AdwHeaderBar
+            showStartTitleButtons={false}
+            showEndTitleButtons={false}
+            showTitle={false}
+            end={<ThemeSwitcher />}
+          />
+        }
+        content={<TodoPage />}
+      />
     </AdwaitaProvider>
   );
 }

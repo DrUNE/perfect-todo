@@ -1,5 +1,5 @@
 import { AdwActionRow, GtkButton, GtkCheckButton } from '@gtk-js/adwaita';
-import type { Todo } from '../../model';
+import type { Todo } from './todoStore';
 
 type TodoItemProps = {
   todo: Todo;

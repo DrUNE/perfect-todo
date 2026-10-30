@@ -1,6 +1,26 @@
 import { useSyncExternalStore } from 'react';
-import { resolveTheme } from './theme';
-import { useThemePreference } from './themePreferenceStore';
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+import { resolveTheme, type ThemePreference } from './theme';
+
+type ThemePreferenceState = {
+  preference: ThemePreference;
+};
+
+export const useThemePreference = create<ThemePreferenceState>()(
+  persist<ThemePreferenceState>(
+    () => ({
+      preference: 'system',
+    }),
+    {
+      name: 'todo-theme-preference',
+    },
+  ),
+);
+
+export const setThemePreference = (preference: ThemePreference) => {
+  useThemePreference.setState({ preference });
+};
 
 const darkThemeQuery = '(prefers-color-scheme: dark)';
 
