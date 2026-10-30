@@ -1,4 +1,4 @@
-import { useRef, useState, type CSSProperties, type PointerEvent } from 'react';
+import { useRef, useState, type CSSProperties, type MouseEvent, type PointerEvent } from 'react';
 
 type UseHorizontalSwipeOptions = {
   /** Смещение по горизонтали, после которого жест засчитывается. */
@@ -22,6 +22,10 @@ export const useHorizontalSwipe = ({ threshold = 72, onSwipe }: UseHorizontalSwi
     null,
   );
 
+  // Нажатие, сдвинутое дальше SLOP (свайп пальцем, протяжка мышью), заканчивается click на элементе: его нужно
+  // погасить, иначе элемент отреагирует как на обычный клик.
+  const pressedAt = useRef<{ x: number; y: number } | null>(null);
+
   const reset = () => {
     gesture.current = null;
     setIsSwiping(false);
@@ -29,6 +33,10 @@ export const useHorizontalSwipe = ({ threshold = 72, onSwipe }: UseHorizontalSwi
   };
 
   const handlePointerDown = (event: PointerEvent<HTMLElement>) => {
+    if (event.isPrimary) {
+      pressedAt.current = { x: event.clientX, y: event.clientY };
+    }
+
     if (event.pointerType === 'mouse' || !event.isPrimary) {
       return;
     }
@@ -89,6 +97,14 @@ export const useHorizontalSwipe = ({ threshold = 72, onSwipe }: UseHorizontalSwi
     }
   };
 
+  const handleClickCapture = (event: MouseEvent<HTMLElement>) => {
+    const pressed = pressedAt.current;
+
+    if (pressed && Math.hypot(event.clientX - pressed.x, event.clientY - pressed.y) > SLOP) {
+      event.stopPropagation();
+    }
+  };
+
   const style: CSSProperties & Record<'--swipe-progress', number> = {
     '--swipe-progress': Math.min(Math.abs(offset) / threshold, 1),
     transform: offset === 0 ? undefined : `translateX(${offset}px)`,
@@ -101,6 +117,7 @@ export const useHorizontalSwipe = ({ threshold = 72, onSwipe }: UseHorizontalSwi
       onPointerMove: handlePointerMove,
       onPointerUp: handlePointerUp,
       onPointerCancel: reset,
+      onClickCapture: handleClickCapture,
     },
     swipeStyle: style,
   };

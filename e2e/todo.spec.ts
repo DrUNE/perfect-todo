@@ -53,7 +53,7 @@ test('Escape clears the new todo input', async ({ page }) => {
 
 test('edits a todo title in place', async ({ page }) => {
   await addTodo(page, 'Старое название');
-  await page.getByRole('button', { name: 'Редактировать задачу' }).click();
+  await todoRow(page, 'Старое название').click();
 
   const editInput = page.getByRole('textbox', { name: 'Название задачи' });
 
@@ -72,7 +72,7 @@ test('edits a todo title in place', async ({ page }) => {
 
 test('cancels in-place editing with Escape without changing the todo', async ({ page }) => {
   await addTodo(page, 'Исходное название');
-  await page.getByRole('button', { name: 'Редактировать задачу' }).click();
+  await todoRow(page, 'Исходное название').click();
 
   const editInput = page.getByRole('textbox', { name: 'Название задачи' });
 
@@ -85,7 +85,7 @@ test('cancels in-place editing with Escape without changing the todo', async ({ 
 
 test('does not save a blank title while editing and keeps the previous one', async ({ page }) => {
   await addTodo(page, 'Остаётся');
-  await page.getByRole('button', { name: 'Редактировать задачу' }).click();
+  await todoRow(page, 'Остаётся').click();
 
   const editInput = page.getByRole('textbox', { name: 'Название задачи' });
 
@@ -97,7 +97,7 @@ test('does not save a blank title while editing and keeps the previous one', asy
 
 test('saves the edited title when the focus leaves the row', async ({ page }) => {
   await addTodo(page, 'Было');
-  await page.getByRole('button', { name: 'Редактировать задачу' }).click();
+  await todoRow(page, 'Было').click();
   await page.getByRole('textbox', { name: 'Название задачи' }).fill('Стало');
 
   await newTodoInput(page).click();
@@ -105,11 +105,17 @@ test('saves the edited title when the focus leaves the row', async ({ page }) =>
   await expect(todoRow(page, 'Стало')).toBeVisible();
 });
 
-test('edits a todo by a double click on its row', async ({ page }) => {
-  await addTodo(page, 'Двойной клик');
-  await page.getByText('Двойной клик', { exact: true }).dblclick();
+test('edits a todo by a click on its row, but not by a click on its buttons', async ({ page }) => {
+  await addTodo(page, 'Клик');
+  await todoRow(page, 'Клик').getByText('Клик', { exact: true }).click();
 
-  await expect(page.getByRole('textbox', { name: 'Название задачи' })).toHaveValue('Двойной клик');
+  await expect(page.getByRole('textbox', { name: 'Название задачи' })).toHaveValue('Клик');
+  await page.getByRole('textbox', { name: 'Название задачи' }).press('Escape');
+
+  await markDone(page, 'Клик');
+
+  await expect(todoRow(page, 'Клик')).toBeVisible();
+  await expect(page.getByRole('textbox', { name: 'Название задачи' })).toHaveCount(0);
 });
 
 test('removes only completed todos and offers to undo', async ({ page }) => {
@@ -130,21 +136,21 @@ test('removes only completed todos and offers to undo', async ({ page }) => {
   await expect(todoRows(page)).toHaveCount(2);
 });
 
-test('shows a trash button instead of the edit button for a completed todo and deletes it', async ({
+test('shows a status button, and a trash button for a completed todo, which deletes it', async ({
   page,
 }) => {
   await addTodo(page, 'Для удаления');
   await addTodo(page, 'Остаётся');
 
-  const editButtons = page.getByRole('button', { name: 'Редактировать задачу' });
+  const doneButtons = page.getByRole('button', { name: 'Отметить как сделанное' });
   const deleteButton = page.getByRole('button', { name: 'Удалить задачу' });
 
-  await expect(editButtons).toHaveCount(2);
+  await expect(doneButtons).toHaveCount(2);
   await expect(deleteButton).toHaveCount(0);
 
   await markDone(page, 'Для удаления');
 
-  await expect(editButtons).toHaveCount(1);
+  await expect(doneButtons).toHaveCount(1);
   await expect(deleteButton).toHaveCount(1);
 
   await deleteButton.click();
@@ -221,9 +227,9 @@ test('shows task action buttons only on hover or keyboard focus on a device with
   await addTodo(page, 'Задача с действиями');
   await addTodo(page, 'Другая задача');
 
-  const editButtons = page.getByRole('button', { name: 'Редактировать задачу' });
-  const otherEdit = editButtons.nth(0);
-  const firstEdit = editButtons.nth(1);
+  const doneButtons = page.getByRole('button', { name: 'Отметить как сделанное' });
+  const otherEdit = doneButtons.nth(0);
+  const firstEdit = doneButtons.nth(1);
 
   await page.mouse.move(0, 0);
   await expect(firstEdit).toHaveCSS('opacity', '0');
@@ -244,9 +250,7 @@ test('shows task action buttons only on hover or keyboard focus on a device with
   await expect(otherEdit).toHaveCSS('opacity', '0');
 });
 
-test('has no checkboxes: the status is changed with the button next to the pencil', async ({
-  page,
-}) => {
+test('has no checkboxes: the status is changed with the button on the row', async ({ page }) => {
   await addTodo(page, 'Без чекбокса');
 
   const row = todoRow(page, 'Без чекбокса');
@@ -258,13 +262,12 @@ test('has no checkboxes: the status is changed with the button next to the penci
     'opacity',
     '1',
   );
-  await expect(row.getByRole('button', { name: 'Редактировать задачу' })).toHaveCSS('opacity', '1');
+  await expect(row.getByRole('button', { name: 'Редактировать задачу' })).toHaveCount(0);
 
   await markDone(page, 'Без чекбокса');
 
   await expect(row).toHaveAccessibleName('Без чекбокса, выполнено');
   await expect(row.getByRole('button', { name: 'Отметить как сделанное' })).toHaveCount(0);
-  await expect(row.getByRole('button', { name: 'Редактировать задачу' })).toHaveCount(0);
 
   await row.hover();
   await expect(row.getByRole('button', { name: 'Вернуть в работу' })).toHaveCSS('opacity', '1');
