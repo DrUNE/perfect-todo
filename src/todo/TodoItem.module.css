@@ -1,8 +1,13 @@
-/* Горизонтальный свайп по строке меняет статус: вертикальную прокрутку страницы оставляем браузеру. */
-.item {
+/* Горизонтальный свайп по строке меняет статус: вертикальную прокрутку страницы оставляем браузеру.
+   `.item.item` повышает специфичность над `.gtk-row.activatable` Adwaita, иначе её transition перекрыл бы наш. */
+.item.item {
   /* Клик по строке начинает редактирование: курсор ввода показывает это заранее. */
   cursor: text;
   touch-action: pan-y;
+  /* Возврат после свайпа и плавный hover (activatable-строка Adwaita), как у строки новой задачи. */
+  transition:
+    transform 150ms ease,
+    background-color 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   /* Подсветка строки по мере свайпа: --swipe-progress от 0 до 1 задаёт хук useHorizontalSwipe. */
   background-image: linear-gradient(
     color-mix(in srgb, var(--accent-bg-color) calc(var(--swipe-progress, 0) * 25%), transparent),
