@@ -1,10 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-
-const newTodoInput = (page: Page) => page.getByRole('textbox', { name: 'Новая задача' });
-const titles = (page: Page) =>
-  page
-    .getByRole('checkbox')
-    .evaluateAll((elements) => elements.map((element) => element.getAttribute('aria-label')));
+import { doneSuffix, newTodoInput, todoRow, todoRows, todoTitles } from './helpers.js';
 
 // Создаём задачи только клавиатурой: поле остаётся в фокусе после Enter.
 const addTodosByKeyboard = async (page: Page, ...todoTitles: string[]) => {
@@ -14,7 +9,7 @@ const addTodosByKeyboard = async (page: Page, ...todoTitles: string[]) => {
     await page.keyboard.type(title);
     await page.keyboard.press('Enter');
     // Добавление применяется внутри View Transition, то есть чуть позже нажатия Enter.
-    await expect(page.getByRole('checkbox', { name: title, exact: true })).toBeVisible();
+    await expect(todoRow(page, title)).toBeVisible();
   }
 };
 
@@ -25,7 +20,7 @@ test.beforeEach(async ({ page }) => {
 test('creates several todos in a row without leaving the keyboard', async ({ page }) => {
   await addTodosByKeyboard(page, 'Раз', 'Два', 'Три');
 
-  expect(await titles(page)).toEqual(['Три', 'Два', 'Раз']);
+  expect(await todoTitles(page)).toEqual(['Три', 'Два', 'Раз']);
   await expect(newTodoInput(page)).toBeFocused();
 });
 
@@ -85,10 +80,10 @@ test('Space toggles the focused todo', async ({ page }) => {
   await page.keyboard.press('ArrowDown');
 
   await page.keyboard.press('Space');
-  await expect(page.getByRole('checkbox', { name: 'Задача' })).toBeChecked();
+  await expect(todoRow(page, 'Задача')).toHaveAccessibleName(doneSuffix);
 
   await page.keyboard.press('Space');
-  await expect(page.getByRole('checkbox', { name: 'Задача' })).not.toBeChecked();
+  await expect(todoRow(page, 'Задача')).not.toHaveAccessibleName(doneSuffix);
 });
 
 test('Enter edits in place, Enter saves and the focus returns to the row', async ({ page }) => {
@@ -104,7 +99,7 @@ test('Enter edits in place, Enter saves and the focus returns to the row', async
   await page.keyboard.type('Новое');
   await page.keyboard.press('Enter');
 
-  await expect(page.getByRole('checkbox', { name: 'Новое' })).toBeVisible();
+  await expect(todoRow(page, 'Новое')).toBeVisible();
   await expect(page.getByRole('listitem').nth(0)).toBeFocused();
 });
 
@@ -116,7 +111,7 @@ test('F2 edits and Escape cancels returning the focus to the row', async ({ page
   await page.keyboard.type('Лишнее');
   await page.keyboard.press('Escape');
 
-  await expect(page.getByRole('checkbox', { name: 'Исходное' })).toBeVisible();
+  await expect(todoRow(page, 'Исходное')).toBeVisible();
   await expect(page.getByRole('listitem').nth(0)).toBeFocused();
 });
 
@@ -128,7 +123,7 @@ test('Tab out of the edited row saves the title', async ({ page }) => {
   await page.keyboard.type('Стало');
   await page.keyboard.press('Tab');
 
-  await expect(page.getByRole('checkbox', { name: 'Стало' })).toBeVisible();
+  await expect(todoRow(page, 'Стало')).toBeVisible();
 });
 
 test('Delete removes the todo and moves the focus to the neighbour, Ctrl+Z restores it', async ({
@@ -140,13 +135,13 @@ test('Delete removes the todo and moves the focus to the neighbour, Ctrl+Z resto
 
   await page.keyboard.press('Delete');
 
-  await expect.poll(() => titles(page)).toEqual(['Третья', 'Первая']);
+  await expect.poll(() => todoTitles(page)).toEqual(['Третья', 'Первая']);
   await expect(page.getByRole('listitem').nth(1)).toBeFocused();
   await expect(page.getByText('Задача удалена')).toBeVisible();
 
   await page.keyboard.press('Control+z');
 
-  await expect.poll(() => titles(page)).toEqual(['Третья', 'Вторая', 'Первая']);
+  await expect.poll(() => todoTitles(page)).toEqual(['Третья', 'Вторая', 'Первая']);
 });
 
 test('Backspace deletes the last todo and moves the focus to the input', async ({ page }) => {
@@ -154,7 +149,7 @@ test('Backspace deletes the last todo and moves the focus to the input', async (
   await page.keyboard.press('ArrowDown');
   await page.keyboard.press('Backspace');
 
-  await expect(page.getByRole('checkbox')).toHaveCount(0);
+  await expect(todoRows(page)).toHaveCount(0);
   await expect(newTodoInput(page)).toBeFocused();
 });
 
@@ -168,24 +163,24 @@ test('Shift+Delete removes completed todos and Ctrl+Z brings them back', async (
 
   await page.keyboard.press('Shift+Delete');
 
-  await expect.poll(() => titles(page)).toEqual(['Б']);
+  await expect.poll(() => todoTitles(page)).toEqual(['Б']);
 
   await page.keyboard.press('Control+z');
 
-  await expect.poll(() => titles(page)).toEqual(['В', 'Б', 'А']);
+  await expect.poll(() => todoTitles(page)).toEqual(['В', 'Б', 'А']);
 });
 
 test('Ctrl+Z inside the input undoes typing and does not restore todos', async ({ page }) => {
   await addTodosByKeyboard(page, 'Задача');
   await page.keyboard.press('ArrowDown');
   await page.keyboard.press('Delete');
-  await expect(page.getByRole('checkbox')).toHaveCount(0);
+  await expect(todoRows(page)).toHaveCount(0);
 
   await newTodoInput(page).focus();
   await page.keyboard.type('Текст');
   await page.keyboard.press('Control+z');
 
-  await expect(page.getByRole('checkbox')).toHaveCount(0);
+  await expect(todoRows(page)).toHaveCount(0);
 });
 
 test('the clear completed button and the theme switcher are reachable by Tab', async ({ page }) => {
@@ -200,7 +195,7 @@ test('the clear completed button and the theme switcher are reachable by Tab', a
   await expect(clearButton).toBeFocused();
 
   await page.keyboard.press('Enter');
-  await expect(page.getByRole('checkbox')).toHaveCount(0);
+  await expect(todoRows(page)).toHaveCount(0);
 });
 
 test('the question mark opens the shortcuts dialog and Escape closes it', async ({ page }) => {
@@ -248,13 +243,13 @@ test('Shift+Delete on a completed row keeps the focus in the page', async ({ pag
 
   await page.keyboard.press('Shift+Delete');
 
-  await expect.poll(() => titles(page)).toEqual(['Первая']);
+  await expect.poll(() => todoTitles(page)).toEqual(['Первая']);
   await expect(page.getByRole('listitem').nth(0)).toBeFocused();
 
   await page.keyboard.press('Space');
   await page.keyboard.press('Shift+Delete');
 
-  await expect(page.getByRole('checkbox')).toHaveCount(0);
+  await expect(todoRows(page)).toHaveCount(0);
   await expect(newTodoInput(page)).toBeFocused();
 });
 
@@ -304,7 +299,7 @@ test.describe('shortcut hints at the bottom of the page', () => {
     await expect(hints(page)).toContainText('удалить завершённые');
 
     await page.keyboard.press('Delete');
-    await expect(page.getByRole('checkbox')).toHaveCount(0);
+    await expect(todoRows(page)).toHaveCount(0);
     // Фокус ушёл со страницы в пустое место: подсказки общие, без привязки к полю или строке.
     await page.mouse.click(5, 5);
 
@@ -329,7 +324,7 @@ test.describe('shortcut hints at the bottom of the page', () => {
     await page.mouse.move(450, 200);
     await page.mouse.wheel(0, 3000);
 
-    const last = await page.getByRole('checkbox', { name: 'Раз', exact: true }).boundingBox();
+    const last = await todoRow(page, 'Раз').boundingBox();
     const bar = await hints(page).boundingBox();
 
     expect((last?.y ?? 0) + (last?.height ?? 0)).toBeLessThanOrEqual(bar?.y ?? 0);

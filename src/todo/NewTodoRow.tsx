@@ -1,4 +1,4 @@
-import { AdwEntryRow, AdwPreferencesGroup, GtkCheckButton } from '@gtk-js/adwaita';
+import { AdwEntryRow, AdwPreferencesGroup } from '@gtk-js/adwaita';
 import { useState, type KeyboardEvent } from 'react';
 import { useDeviceInfo } from '@/shared/useDeviceInfo';
 import { withViewTransition } from '@/shared/withViewTransition';
@@ -43,7 +43,6 @@ export function NewTodoRow({ onNavigateDown, onAdded }: NewTodoRowProps) {
       <AdwEntryRow
         title="Новая задача"
         text={title}
-        prefixWidget={<GtkCheckButton valign="center" disabled aria-hidden tabIndex={-1} />}
         suffixWidget={
           hasTouch &&
           title !== '' && (
