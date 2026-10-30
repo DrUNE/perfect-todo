@@ -70,7 +70,7 @@ e2e/                      # пользовательские сценарии Pl
 
 Импорты исходного кода выполняются через алиас `@/`, например `@/todo/todoStore`.
 
-Интерфейс собран из компонентов GTK Adwaita (`AdwaitaProvider`, `AdwToolbarView`, `AdwPreferencesGroup`, `AdwActionRow`, `GtkEntry` и др.); тема и цвета задаются провайдером, собственных стилей нет.
+Интерфейс собран из компонентов GTK Adwaita (`AdwaitaProvider`, `AdwPreferencesGroup`, `AdwActionRow`, `GtkEntry` и др.); тема и цвета задаются провайдером, собственных стилей нет.
 
 ## Команды
 

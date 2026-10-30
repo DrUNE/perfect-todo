@@ -1,4 +1,4 @@
-import { AdwaitaProvider, AdwHeaderBar, AdwToolbarView } from '@gtk-js/adwaita';
+import { AdwaitaProvider, AdwHeaderBar } from '@gtk-js/adwaita';
 import { useEffect } from 'react';
 import { ThemeSwitcher } from '@/theme/ThemeSwitcher';
 import { useDeviceInfo } from '@/shared/useDeviceInfo';
@@ -26,18 +26,14 @@ export function App() {
 
   return (
     <AdwaitaProvider colorScheme={resolvedTheme}>
-      <AdwToolbarView
-        style={{ minHeight: '100dvh' }}
-        topBars={
-          <AdwHeaderBar
-            showStartTitleButtons={false}
-            showEndTitleButtons={false}
-            showTitle={false}
-            end={<ThemeSwitcher />}
-          />
-        }
-        content={<TodoPage />}
+      <AdwHeaderBar
+        className="flat"
+        showStartTitleButtons={false}
+        showEndTitleButtons={false}
+        showTitle={false}
+        end={<ThemeSwitcher />}
       />
+      <TodoPage />
     </AdwaitaProvider>
   );
 }

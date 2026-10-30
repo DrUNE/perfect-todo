@@ -34,28 +34,42 @@ export function TodoPage() {
 
   return (
     <AdwClamp maximumSize={400}>
-      <GtkBox orientation="vertical" spacing={16} style={{ padding: 16 }}>
-        <AddTodoForm
-          value={title}
-          isEditing={editingTodo !== null}
-          onChange={setTitle}
-          onSubmit={handleSubmit}
-          onCancelEdit={cancelEditing}
-        />
-        <ClearCompletedButton />
-        {todoList.length > 0 && (
-          <AdwPreferencesGroup>
-            {todoList.map((todo) => (
-              <TodoItem
-                key={todo.id}
-                todo={todo}
-                onToggle={toggleTodo}
-                onEdit={() => startEditing(todo)}
-              />
-            ))}
-          </AdwPreferencesGroup>
-        )}
-      </GtkBox>
+      <div style={{ padding: '0 16px 16px' }}>
+        <div
+          style={{
+            position: 'sticky',
+            top: 0,
+            zIndex: 1,
+            // Фон шире списка на отступ контейнера, чтобы тень списка не просвечивала по бокам.
+            margin: '0 -16px',
+            padding: '16px',
+            background: 'var(--window-bg-color)',
+          }}
+        >
+          <AddTodoForm
+            value={title}
+            isEditing={editingTodo !== null}
+            onChange={setTitle}
+            onSubmit={handleSubmit}
+            onCancelEdit={cancelEditing}
+          />
+        </div>
+        <GtkBox orientation="vertical" spacing={16}>
+          <ClearCompletedButton />
+          {todoList.length > 0 && (
+            <AdwPreferencesGroup>
+              {todoList.map((todo) => (
+                <TodoItem
+                  key={todo.id}
+                  todo={todo}
+                  onToggle={toggleTodo}
+                  onEdit={() => startEditing(todo)}
+                />
+              ))}
+            </AdwPreferencesGroup>
+          )}
+        </GtkBox>
+      </div>
     </AdwClamp>
   );
 }

@@ -11,12 +11,15 @@
   }
 
   html {
+    scrollbar-gutter: stable; /* место под полосу прокрутки резервируется, страница не прыгает при её появлении */
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
   }
 
   body {
     min-height: 100dvh;
+    background-color: var(--window-bg-color);
+    color: var(--window-fg-color);
     overflow-x: hidden; /* заголовок Adwaita выходит за край окна на 1px (margin -1px) */
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
