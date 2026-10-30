@@ -117,6 +117,8 @@ test('keeps todos and their status after a page reload', async ({ page }) => {
   await expect(page.getByRole('checkbox', { name: 'Выполненная задача' })).toBeChecked();
 
   await page.getByRole('button', { name: 'Удалить задачу' }).click();
+  // Удаление анимируется и применяется чуть позже клика: дожидаемся его перед перезагрузкой.
+  await expect(page.getByRole('checkbox', { name: 'Выполненная задача' })).toHaveCount(0);
   await page.reload();
 
   await expect(page.getByRole('checkbox', { name: 'Выполненная задача' })).toHaveCount(0);
@@ -144,4 +146,15 @@ test('ignores corrupted todos in localStorage', async ({ page }) => {
 
   await expect(page.getByRole('checkbox', { name: 'Корректная задача' })).toBeVisible();
   await expect(page.getByRole('checkbox')).toHaveCount(1);
+});
+
+test('puts new todos at the top of the list', async ({ page }) => {
+  await addTodo(page, 'Первая добавленная');
+  await addTodo(page, 'Вторая добавленная');
+  await addTodo(page, 'Третья добавленная');
+
+  await expect(page.getByRole('checkbox')).toHaveCount(3);
+  await expect(page.getByRole('checkbox').nth(0)).toHaveAccessibleName('Третья добавленная');
+  await expect(page.getByRole('checkbox').nth(1)).toHaveAccessibleName('Вторая добавленная');
+  await expect(page.getByRole('checkbox').nth(2)).toHaveAccessibleName('Первая добавленная');
 });

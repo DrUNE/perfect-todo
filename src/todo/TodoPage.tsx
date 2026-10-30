@@ -1,7 +1,8 @@
-import { AdwClamp, AdwPreferencesGroup, GtkBox } from '@gtk-js/adwaita';
+import { AdwClamp, AdwPreferencesGroup } from '@gtk-js/adwaita';
 import { useState, type CSSProperties } from 'react';
+import { withViewTransition } from '@/shared/withViewTransition';
 import { AddTodoForm } from './AddTodoForm';
-import { ClearCompletedButton } from './ClearCompletedButton';
+import { TodoToolbar } from './TodoToolbar';
 import { TodoItem } from './TodoItem';
 import { addTodo, deleteTodo, editTodo, toggleTodo, useTodoList, type Todo } from './todoStore';
 
@@ -47,7 +48,7 @@ export function TodoPage() {
       return;
     }
 
-    addTodo(title);
+    withViewTransition(() => addTodo(title));
     setTitle('');
   };
 
@@ -56,7 +57,7 @@ export function TodoPage() {
       cancelEditing();
     }
 
-    deleteTodo(id);
+    withViewTransition(() => deleteTodo(id));
   };
 
   const startEditing = (todo: Todo) => {
@@ -70,31 +71,36 @@ export function TodoPage() {
         <div style={stickyBarStyle}>
           <div aria-hidden style={fadeStyle} />
           <div style={{ position: 'relative' }}>
-            <AddTodoForm
-              value={title}
-              isEditing={editingTodo !== null}
-              onChange={setTitle}
-              onSubmit={handleSubmit}
-              onCancelEdit={cancelEditing}
+            <TodoToolbar
+              isInputActive={editingTodo !== null || title !== ''}
+              canConfirm={title.trim() !== ''}
+              onConfirm={handleSubmit}
+              onCancel={cancelEditing}
             />
+            <div style={{ viewTransitionName: 'todo-input' }}>
+              <AddTodoForm
+                value={title}
+                isEditing={editingTodo !== null}
+                onChange={setTitle}
+                onSubmit={handleSubmit}
+                onCancelEdit={cancelEditing}
+              />
+            </div>
           </div>
         </div>
-        <GtkBox orientation="vertical" spacing={16}>
-          <ClearCompletedButton />
-          {todoList.length > 0 && (
-            <AdwPreferencesGroup>
-              {todoList.map((todo) => (
-                <TodoItem
-                  key={todo.id}
-                  todo={todo}
-                  onToggle={toggleTodo}
-                  onEdit={() => startEditing(todo)}
-                  onDelete={handleDelete}
-                />
-              ))}
-            </AdwPreferencesGroup>
-          )}
-        </GtkBox>
+        {todoList.length > 0 && (
+          <AdwPreferencesGroup style={{ viewTransitionName: 'todo-list' }}>
+            {todoList.map((todo) => (
+              <TodoItem
+                key={todo.id}
+                todo={todo}
+                onToggle={toggleTodo}
+                onEdit={() => startEditing(todo)}
+                onDelete={handleDelete}
+              />
+            ))}
+          </AdwPreferencesGroup>
+        )}
       </div>
     </AdwClamp>
   );

@@ -20,13 +20,14 @@ describe('todoStore', () => {
   });
 
   describe('addTodo', () => {
-    it('adds an incomplete todo with generated id and trimmed title', () => {
+    it('adds an incomplete todo with generated id and trimmed title to the top of the list', () => {
       addTodo('  Новая задача  ');
 
       const todoList = useTodoList.getState().todoList;
 
       expect(todoList).toHaveLength(3);
-      expect(todoList[2]).toEqual({
+      expect(todoList.slice(1)).toEqual(initialTodoList);
+      expect(todoList[0]).toEqual({
         id: expect.any(String),
         title: 'Новая задача',
         isComplete: false,

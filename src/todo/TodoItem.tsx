@@ -20,6 +20,8 @@ export function TodoItem({ todo, onToggle, onEdit, onDelete }: TodoItemProps) {
 
   return (
     <AdwActionRow
+      // Имя нужно браузеру, чтобы анимировать появление, удаление и сдвиг этой строки.
+      style={{ viewTransitionName: `todo-${todo.id}` }}
       title={todo.isComplete ? `<s>${escapeMarkup(todo.title)}</s>` : todo.title}
       useMarkup={todo.isComplete}
       prefixWidget={

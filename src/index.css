@@ -69,3 +69,15 @@
     width: env(viewport-segment-width 0 0);
   }
 }
+
+/* Анимация появления, удаления и сдвига задач (View Transitions API, см. withViewTransition). */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-group(*) {
+  animation-duration: 250ms;
+  animation-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
+}

@@ -50,9 +50,10 @@ export const addTodo = (title: Todo['title']) => {
     return;
   }
 
+  // Новые задачи добавляются в начало списка.
   setTodoList((todoList) => [
-    ...todoList,
     { id: crypto.randomUUID(), title: normalizedTitle, isComplete: false },
+    ...todoList,
   ]);
 };
 
