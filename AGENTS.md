@@ -15,6 +15,7 @@
 - `src/app/App.tsx` также содержит `AdwaitaProvider`, шапку (`AdwHeaderBar` с `ThemeSwitcher`) и подключает `TodoPage`.
 - `src/todo/` — модуль задач без слоёв: `todoStore.ts` (тип `Todo`, store `useTodoList` и все действия `addTodo`, `toggleTodo`, `editTodo`, `clearCompletedTodos`; `addTodo` и `editTodo` обрезают заголовок и отбрасывают пустой), `TodoPage.tsx` (локальное состояние input и редактирования; Enter сохраняет, Esc отменяет), `AddTodoForm.tsx` (общий управляемый input для создания/редактирования), `TodoItem.tsx` (отображение задачи; действия приходят через callbacks), `ClearCompletedButton.tsx` (скрыта, если завершённых задач нет).
 - `src/theme/` — трёхпозиционный переключатель темы (светлая/браузер/тёмная): `theme.ts` (типы и `resolveTheme`), `themeStore.ts` (persist-store `todo-theme-preference` и `useResolvedTheme` с отслеживанием `matchMedia`), `ThemeSwitcher.tsx`. `AdwaitaProvider` получает `colorScheme` из вычисленной темы, `html[data-theme]` выставляется в `App`.
+- `src/shared/` — `useMediaQuery` (подписка на `matchMedia` через `useSyncExternalStore`) и `useDeviceInfo` → `{ isMobile (pointer: coarse — тип устройства, не зависит от ширины, поэтому раскладной смартфон остаётся мобильным и в развёрнутом виде), isCompact (≤600px), hasTouch (any-pointer: coarse), hasMouse (any-pointer: fine + any-hover: hover), isFoldSpanned (окно разделено сгибом) }`. `App` пишет их в `html[data-mobile|compact|touch|mouse|fold-spanned]`; при `hasTouch` `AddTodoForm` показывает кнопку «Отмена» вместо Esc. Правило `@media (horizontal-viewport-segments: 2)` в `index.css` держит контент в первой половине экрана; оно не покрыто тестами (Chromium в Playwright не эмулирует сгиб). Определять устройство только через `useDeviceInfo`, не по user agent.
 - Стили и тема приходят из `@gtk-js/adwaita` (`AdwaitaProvider` в `App`); Ant Design, Panda CSS и CSS Modules удалены, единственный собственный CSS — `src/index.css` (reset в слое `reset`). Иконки задаются PascalCase-именами из `@gtk-js/icons-adwaita` (`DocumentEdit`, `WeatherClear`).
 - `public/` — статические файлы, доступные по URL от корня; сейчас там только `favicon.svg`.
 - Unit-тесты запускаются через Vitest 5 в Node-окружении и используют общий `vite.config.ts`, включая алиас `@/`. Тесты лежат рядом с модулями: `todo/todoStore.test.ts`, `theme/theme.test.ts`.
@@ -51,10 +52,10 @@ src/
   app/                 # провайдеры, шапка, глобальная композиция, router при появлении
   todo/                # store, действия и UI задач
   theme/               # тема приложения
-  shared/              # только по реальной необходимости: нейтральные ui, lib, api
+  shared/              # нейтральные хуки и утилиты (useMediaQuery, useDeviceInfo); ui, api — по необходимости
 ```
 
-- Направление зависимостей: модуль предметной области не импортирует другие модули и `app`; `app` их собирает; `shared` не знает о модулях.
+- Направление зависимостей: модуль предметной области не импортирует другие модули и `app`; `app` их собирает; `shared` не знает о модулях, а модули могут импортировать `shared`.
 - Не создавать пустые папки и файлы «на будущее». Для небольшого примера допустимо оставить код рядом с компонентом, а выделить модуль при повторном использовании или росте ответственности.
 - Barrel-файлы `index.ts` добавлять, только когда модуль вырос и нужен явный публичный API; сейчас файлы импортируются напрямую (`@/todo/TodoPage`).
 - Не помещать всё в `shared`: это слой действительно переиспользуемого и не зависящего от предметной области кода.

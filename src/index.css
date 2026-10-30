@@ -59,3 +59,10 @@
     isolation: isolate;
   }
 }
+
+/* Раскладной экран в режиме двух половин: контент держим в первой, чтобы он не попадал на сгиб. */
+@media (horizontal-viewport-segments: 2) {
+  #root {
+    width: env(viewport-segment-width 0 0);
+  }
+}

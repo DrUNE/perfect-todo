@@ -61,6 +61,7 @@ src/
   app/                    # AdwaitaProvider, шапка и композиция приложения
   todo/                   # Zustand-store и действия задач, страница и UI задач, тесты
   theme/                  # выбор и сохранение темы приложения
+  shared/                 # useMediaQuery и useDeviceInfo (мобильное устройство, узкое окно, touch, мышь, сгиб)
   main.tsx                # точка входа
 vite.config.ts            # Vite, Vitest и алиасы
 playwright.config.ts      # конфигурация E2E-тестов
