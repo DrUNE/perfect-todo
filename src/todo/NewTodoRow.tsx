@@ -4,6 +4,7 @@ import { useDeviceInfo } from '@/shared/useDeviceInfo';
 import { withViewTransition } from '@/shared/withViewTransition';
 import { RowActions } from './RowActions';
 import styles from './NewTodoRow.module.css';
+import editorStyles from './TodoItemEditor.module.css';
 import { addTodo } from './todoStore';
 
 type NewTodoRowProps = {
@@ -42,7 +43,7 @@ export function NewTodoRow({ onNavigateDown, onAdded }: NewTodoRowProps) {
   return (
     <AdwPreferencesGroup>
       <AdwEntryRow
-        className={title === '' ? styles.row : `${styles.row} ${styles.filled}`}
+        className={`${editorStyles.editor} ${styles.row}${title === '' ? '' : ` ${styles.filled}`}`}
         title="Новая задача"
         text={title}
         suffixWidget={
