@@ -1,5 +1,6 @@
 import { AdwPreferencesGroup } from '@gtk-js/adwaita';
 import { useEffect, useEffectEvent, useRef, useState, type FocusEvent } from 'react';
+import { useDeviceInfo } from '@/shared/useDeviceInfo';
 import styles from './TodoList.module.css';
 import { TodoItem } from './TodoItem';
 import { TodoItemEditor } from './TodoItemEditor';
@@ -19,6 +20,7 @@ const findRow = (container: HTMLElement | null, id: Todo['id']) =>
 // Клавиши на строке: Пробел отмечает, Enter или F2 редактирует, Delete или Backspace удаляет.
 export function TodoList({ onDelete, onNavigateUp, announce }: TodoListProps) {
   const todoList = useTodoList((state) => state.todoList);
+  const { hasMouse } = useDeviceInfo();
   const [editingId, setEditingId] = useState<Todo['id'] | null>(null);
   const [activeId, setActiveId] = useState<Todo['id'] | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -164,7 +166,7 @@ export function TodoList({ onDelete, onNavigateUp, announce }: TodoListProps) {
   };
 
   return (
-    <div ref={containerRef} onFocus={handleFocus}>
+    <div ref={containerRef} className={styles.container} onFocus={handleFocus}>
       {todoList.length > 0 && (
         <AdwPreferencesGroup className={styles.list}>
           {todoList.map((todo) =>
@@ -180,6 +182,7 @@ export function TodoList({ onDelete, onNavigateUp, announce }: TodoListProps) {
                 key={todo.id}
                 todo={todo}
                 isTabStop={todo.id === tabStopId}
+                showStatusButton={hasMouse}
                 onToggle={toggle}
                 onEdit={setEditingId}
                 onDelete={remove}

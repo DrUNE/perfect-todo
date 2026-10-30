@@ -1,17 +1,13 @@
-import { expect, test, type Page } from '@playwright/test';
-
-const newTodoInput = (page: Page) => page.getByRole('textbox', { name: 'Новая задача' });
-
-// Ждём окончания анимаций (в том числе View Transition), чтобы измерять итоговое положение элементов.
-const waitForAnimations = (page: Page) =>
-  page.waitForFunction('document.getAnimations().length === 0');
-
-const addTodo = async (page: Page, title: string) => {
-  await newTodoInput(page).fill(title);
-  await newTodoInput(page).press('Enter');
-  // Добавление применяется внутри View Transition, то есть чуть позже нажатия Enter.
-  await expect(page.getByRole('checkbox', { name: title, exact: true })).toBeVisible();
-};
+import { expect, test } from '@playwright/test';
+import {
+  addTodo,
+  markDone,
+  newTodoInput,
+  swipeRow,
+  todoRow,
+  todoRows,
+  waitForAnimations,
+} from './helpers.js';
 
 test.describe('desktop with mouse', () => {
   test('is not mobile, has no touch and has a mouse', async ({ page }) => {
@@ -39,7 +35,7 @@ test.describe('desktop with mouse', () => {
   }) => {
     await page.goto('/');
     await addTodo(page, 'Задача');
-    await page.getByRole('checkbox', { name: 'Задача' }).check();
+    await markDone(page, 'Задача');
 
     const clear = await page.getByRole('button', { name: 'Удалить завершённые' }).boundingBox();
     const input = await newTodoInput(page).boundingBox();
@@ -79,13 +75,16 @@ test.describe('touch-only mobile device', () => {
     const input = newTodoInput(page);
     const initialBox = await input.boundingBox();
 
-    await page.getByRole('checkbox', { name: 'Задача' }).tap();
+    await swipeRow(page, 'Задача');
 
     const clear = page.getByRole('button', { name: 'Удалить завершённые' });
+
+    await expect(clear).toBeVisible();
+    await waitForAnimations(page);
+
     const clearBox = await clear.boundingBox();
     const viewportHeight = page.viewportSize()?.height ?? 0;
 
-    await expect(clear).toBeVisible();
     // Кнопка у нижнего края окна и ниже всех строк, а поле ввода и список не сдвинулись.
     expect((clearBox?.y ?? 0) + (clearBox?.height ?? 0)).toBeGreaterThan(viewportHeight - 60);
     expect(clearBox?.y).toBeGreaterThan((initialBox?.y ?? 0) + (initialBox?.height ?? 0));
@@ -93,10 +92,56 @@ test.describe('touch-only mobile device', () => {
 
     await clear.tap();
 
-    await expect(page.getByRole('checkbox')).toHaveCount(0);
+    await expect(todoRows(page)).toHaveCount(0);
     await expect(page.getByText('Удалено задач: 1')).toBeVisible();
     await waitForAnimations(page);
     expect(await input.boundingBox()).toMatchObject({ y: initialBox?.y });
+  });
+
+  test('has no checkboxes and no status button: a horizontal swipe changes the status', async ({
+    page,
+  }) => {
+    await page.goto('/');
+    await addTodo(page, 'Свайп');
+
+    const row = todoRow(page, 'Свайп');
+
+    await expect(page.getByRole('checkbox')).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Отметить как сделанное' })).toHaveCount(0);
+    await expect(row.getByRole('button', { name: 'Редактировать задачу' })).toBeVisible();
+
+    await swipeRow(page, 'Свайп', 120);
+    await expect(row).toHaveAccessibleName('Свайп, выполнено');
+    await expect(row.getByRole('button', { name: 'Удалить задачу' })).toBeVisible();
+    await expect(page.getByText('Задача «Свайп» выполнена')).toBeAttached();
+
+    // Влево тоже переключает: возвращаем в работу.
+    await swipeRow(page, 'Свайп', -120);
+    await expect(row).toHaveAccessibleName('Свайп');
+  });
+
+  test('ignores a short swipe', async ({ page }) => {
+    await page.goto('/');
+    await addTodo(page, 'Короткий');
+
+    await swipeRow(page, 'Короткий', 40);
+
+    await expect(todoRow(page, 'Короткий')).toHaveAccessibleName('Короткий');
+  });
+
+  test('does not widen the page after a swipe', async ({ page }) => {
+    await page.goto('/');
+    await addTodo(page, 'Ширина');
+
+    const before = await page.evaluate('[innerWidth, innerHeight]');
+
+    await swipeRow(page, 'Ширина', 120);
+    await expect(todoRow(page, 'Ширина')).toHaveAccessibleName('Ширина, выполнено');
+    await waitForAnimations(page);
+
+    const after = await page.evaluate('[innerWidth, innerHeight]');
+
+    expect(after).toEqual(before);
   });
 
   test('does not show the shortcuts button and keyboard hints', async ({ page }) => {
@@ -130,7 +175,7 @@ test.describe('touch-only mobile device', () => {
     await expect(confirm).toBeEnabled();
     await confirm.tap();
 
-    await expect(page.getByRole('checkbox', { name: 'Новая через кнопку' })).toBeVisible();
+    await expect(todoRow(page, 'Новая через кнопку')).toBeVisible();
     await expect(input).toHaveValue('');
     await expect(confirm).toHaveCount(0);
 
@@ -153,14 +198,14 @@ test.describe('touch-only mobile device', () => {
     await editInput.fill('Несохранённое');
     await page.getByRole('button', { name: 'Отмена' }).tap();
 
-    await expect(page.getByRole('checkbox', { name: 'Старое' })).toBeVisible();
+    await expect(todoRow(page, 'Старое')).toBeVisible();
     await expect(page.getByText('Несохранённое')).toHaveCount(0);
 
     await page.getByRole('button', { name: 'Редактировать задачу' }).tap();
     await editInput.fill('Новое');
     await page.getByRole('button', { name: 'Подтвердить' }).tap();
 
-    await expect(page.getByRole('checkbox', { name: 'Новое' })).toBeVisible();
+    await expect(todoRow(page, 'Новое')).toBeVisible();
     await expect(page.getByRole('button', { name: 'Подтвердить' })).toHaveCount(0);
   });
 
@@ -198,7 +243,7 @@ test.describe('touch-only mobile device', () => {
       '1',
     );
 
-    await page.getByRole('checkbox', { name: 'Задача' }).tap();
+    await swipeRow(page, 'Задача');
 
     await expect(page.getByRole('button', { name: 'Удалить задачу' })).toHaveCSS('opacity', '1');
   });
@@ -208,14 +253,14 @@ test.describe('touch-only mobile device', () => {
   }) => {
     await page.goto('/');
     await addTodo(page, 'Задача');
-    await page.getByRole('checkbox', { name: 'Задача' }).tap();
+    await swipeRow(page, 'Задача');
     await page.getByRole('button', { name: 'Удалить задачу' }).tap();
 
-    await expect(page.getByRole('checkbox')).toHaveCount(0);
+    await expect(todoRows(page)).toHaveCount(0);
 
     await page.getByRole('button', { name: 'Отменить' }).tap();
 
-    await expect(page.getByRole('checkbox', { name: 'Задача' })).toBeVisible();
+    await expect(todoRow(page, 'Задача')).toBeVisible();
   });
 });
 

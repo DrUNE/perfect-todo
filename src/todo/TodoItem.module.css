@@ -1,3 +1,13 @@
+/* Горизонтальный свайп по строке меняет статус: вертикальную прокрутку страницы оставляем браузеру. */
+.item {
+  touch-action: pan-y;
+  /* Подсветка строки по мере свайпа: --swipe-progress от 0 до 1 задаёт хук useHorizontalSwipe. */
+  background-image: linear-gradient(
+    color-mix(in srgb, var(--accent-bg-color) calc(var(--swipe-progress, 0) * 25%), transparent),
+    color-mix(in srgb, var(--accent-bg-color) calc(var(--swipe-progress, 0) * 25%), transparent)
+  );
+}
+
 /* На устройствах с мышью кнопки действий видны только при наведении на строку или клавиатурном фокусе
    на ней или внутри неё. На тач-экранах (hover: none) наведения нет, поэтому кнопки остаются видимыми всегда. */
 @media (hover: hover) {
