@@ -22,12 +22,12 @@
 - React 19 и TypeScript 7;
 - Vite 8 с HMR и sourcemaps в dev-режиме;
 - Zustand 5;
-- GTK Adwaita для React (`@gtk-js/adwaita`, `@gtk-js/icons-adwaita`);
+- GTK Adwaita для React (`@gtk-js/adwaita`, иконки Adwaita подключаются вместе с ним);
 - Vitest 5 и Playwright.
 
 ## Требования
 
-- Node.js `^20.19.0` или `>=22.12.0`;
+- Node.js только LTS-версий: `^22.12.0`, `^24` или `^26` (поле `engines` в `package.json`, `engine-strict=true` в `.npmrc`: установка на других версиях, например 25, завершится ошибкой); рекомендуемая версия записана в `.nvmrc` (`nvm use` или `fnm use`);
 - npm;
 - Chromium для E2E-тестов, устанавливается отдельной командой из этого README.
 
