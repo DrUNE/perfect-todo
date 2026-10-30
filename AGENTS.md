@@ -20,7 +20,7 @@
 - `src/features/theme-switch/` — трёхпозиционный переключатель темы (светлая/браузер/тёмная). Выбор сохраняется в Zustand persist/localStorage, системная тема отслеживается через `matchMedia`; `AdwaitaProvider` получает `colorScheme` из вычисленной темы, `html[data-theme]` выставляется в `App`.
 - `src/entities/todo/model/` — типы и Zustand-store задач.
 - `src/entities/todo/ui/TodoItem/` — отображение отдельной задачи; UI получает действие через callback и не зависит от feature.
-- Стили и тема приходят из `@gtk-js/adwaita` (`AdwaitaProvider` в `App`); Ant Design, Panda CSS и CSS Modules удалены, собственного CSS в проекте нет. Иконки задаются PascalCase-именами из `@gtk-js/icons-adwaita` (`DocumentEdit`, `WeatherClear`).
+- Стили и тема приходят из `@gtk-js/adwaita` (`AdwaitaProvider` в `App`); Ant Design, Panda CSS и CSS Modules удалены, единственный собственный CSS — `src/index.css` (reset в слое `reset`). Иконки задаются PascalCase-именами из `@gtk-js/icons-adwaita` (`DocumentEdit`, `WeatherClear`).
 - `public/` — статические файлы, доступные по URL от корня; сейчас там только `favicon.svg`.
 - Unit-тесты запускаются через Vitest 5 в Node-окружении и используют общий `vite.config.ts`, включая алиас `@/`. Примеры тестов находятся рядом с моделями в `entities/todo/model` и `features/todo-*/model`.
 - E2E-тесты находятся в `e2e/` и запускаются через Playwright в Chromium. `playwright.config.ts` автоматически поднимает Vite на `127.0.0.1:5173`; браузеры устанавливаются локально в `node_modules` через `PLAYWRIGHT_BROWSERS_PATH=0`, поэтому после `npm ci` нужно повторить `npm run test:e2e:install`.

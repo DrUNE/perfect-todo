@@ -44,7 +44,7 @@ export function TodoPage() {
 
   return (
     <AdwToolbarView
-      style={{ minHeight: '100vh' }}
+      style={{ minHeight: '100dvh' }}
       topBars={
         <AdwHeaderBar
           showStartTitleButtons={false}
