@@ -1,5 +1,6 @@
 import { AdwActionRow, GtkBox, GtkButton } from '@gtk-js/adwaita';
 import type { MouseEvent } from 'react';
+import { cx } from '@/shared/cx';
 import { useHorizontalSwipe } from '@/shared/useHorizontalSwipe';
 import styles from './TodoItem.module.css';
 import type { Todo } from './todoStore';
@@ -14,6 +15,9 @@ type TodoItemProps = {
   onEdit: (id: Todo['id']) => void;
   onDelete: (id: Todo['id']) => void;
 };
+
+// Круглые кнопки действий внутри строки; видимость при наведении задаёт `.action` (см. TodoItem.module.css).
+const actionClassName = cx('circular', styles.action);
 
 const escapeMarkup = (text: string) =>
   text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -49,7 +53,7 @@ export function TodoItem({
 
   return (
     <AdwActionRow
-      className={todo.isComplete ? `${styles.item} ${styles.done}` : styles.item}
+      className={cx(styles.item, todo.isComplete && styles.done)}
       data-todo-id={todo.id}
       tabIndex={isTabStop ? 0 : -1}
       // Состояние выполнено передаётся не только зачёркиванием, но и именем строки.
@@ -64,7 +68,7 @@ export function TodoItem({
           {showStatusButton && (
             <GtkButton
               tabIndex={-1}
-              className={`circular ${styles.action}`}
+              className={actionClassName}
               hasFrame={false}
               iconName={todo.isComplete ? 'EditUndo' : 'ObjectSelect'}
               aria-label={todo.isComplete ? 'Вернуть в работу' : 'Отметить как сделанное'}
@@ -75,7 +79,7 @@ export function TodoItem({
           {todo.isComplete && (
             <GtkButton
               tabIndex={-1}
-              className={`circular ${styles.action}`}
+              className={actionClassName}
               hasFrame={false}
               iconName="UserTrash"
               aria-label="Удалить задачу"

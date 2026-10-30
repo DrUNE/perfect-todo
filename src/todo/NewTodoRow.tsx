@@ -1,5 +1,6 @@
 import { AdwEntryRow, AdwPreferencesGroup } from '@gtk-js/adwaita';
 import { useState, type KeyboardEvent } from 'react';
+import { cx } from '@/shared/cx';
 import { useDeviceInfo } from '@/shared/useDeviceInfo';
 import { withViewTransition } from '@/shared/withViewTransition';
 import { RowActions } from './RowActions';
@@ -43,7 +44,7 @@ export function NewTodoRow({ onNavigateDown, onAdded }: NewTodoRowProps) {
   return (
     <AdwPreferencesGroup>
       <AdwEntryRow
-        className={`${editorStyles.editor} ${styles.row}${title === '' ? '' : ` ${styles.filled}`}`}
+        className={cx(editorStyles.editor, styles.row, title !== '' && styles.filled)}
         title="Новая задача"
         text={title}
         suffixWidget={
