@@ -1,2 +1,0 @@
-@layer reset, base, tokens, recipes, utilities;
-@import 'antd/dist/reset.css' layer(reset);
