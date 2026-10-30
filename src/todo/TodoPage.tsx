@@ -1,9 +1,33 @@
 import { AdwClamp, AdwPreferencesGroup, GtkBox } from '@gtk-js/adwaita';
-import { useState } from 'react';
+import { useState, type CSSProperties } from 'react';
 import { AddTodoForm } from './AddTodoForm';
 import { ClearCompletedButton } from './ClearCompletedButton';
 import { TodoItem } from './TodoItem';
 import { addTodo, editTodo, toggleTodo, useTodoList, type Todo } from './todoStore';
+
+const fadeHeight = 24;
+const fadeMask = `linear-gradient(to bottom, black calc(100% - ${fadeHeight}px), transparent)`;
+
+// Закреплённая полоса с полем ввода. Её нижние fadeHeight px — отступ перед списком, в котором
+// прокручиваемый список плавно уходит в прозрачность и размытие, а не обрезается резко.
+// Полоса шире списка на отступ контейнера, чтобы тень списка не просвечивала по бокам.
+const stickyBarStyle: CSSProperties = {
+  position: 'sticky',
+  top: 0,
+  zIndex: 1,
+  margin: '0 -16px',
+  padding: `16px 16px ${fadeHeight}px`,
+};
+
+const fadeStyle: CSSProperties = {
+  position: 'absolute',
+  inset: 0,
+  background: `linear-gradient(to bottom, var(--window-bg-color) calc(100% - ${fadeHeight}px), transparent)`,
+  backdropFilter: 'blur(6px)',
+  WebkitBackdropFilter: 'blur(6px)',
+  maskImage: fadeMask,
+  WebkitMaskImage: fadeMask,
+};
 
 export function TodoPage() {
   const todoList = useTodoList((state) => state.todoList);
@@ -35,24 +59,17 @@ export function TodoPage() {
   return (
     <AdwClamp maximumSize={400}>
       <div style={{ padding: '0 16px 16px' }}>
-        <div
-          style={{
-            position: 'sticky',
-            top: 0,
-            zIndex: 1,
-            // Фон шире списка на отступ контейнера, чтобы тень списка не просвечивала по бокам.
-            margin: '0 -16px',
-            padding: '16px',
-            background: 'var(--window-bg-color)',
-          }}
-        >
-          <AddTodoForm
-            value={title}
-            isEditing={editingTodo !== null}
-            onChange={setTitle}
-            onSubmit={handleSubmit}
-            onCancelEdit={cancelEditing}
-          />
+        <div style={stickyBarStyle}>
+          <div aria-hidden style={fadeStyle} />
+          <div style={{ position: 'relative' }}>
+            <AddTodoForm
+              value={title}
+              isEditing={editingTodo !== null}
+              onChange={setTitle}
+              onSubmit={handleSubmit}
+              onCancelEdit={cancelEditing}
+            />
+          </div>
         </div>
         <GtkBox orientation="vertical" spacing={16}>
           <ClearCompletedButton />
