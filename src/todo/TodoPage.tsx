@@ -3,7 +3,7 @@ import { useState, type CSSProperties } from 'react';
 import { AddTodoForm } from './AddTodoForm';
 import { ClearCompletedButton } from './ClearCompletedButton';
 import { TodoItem } from './TodoItem';
-import { addTodo, editTodo, toggleTodo, useTodoList, type Todo } from './todoStore';
+import { addTodo, deleteTodo, editTodo, toggleTodo, useTodoList, type Todo } from './todoStore';
 
 const fadeHeight = 24;
 const fadeMask = `linear-gradient(to bottom, black calc(100% - ${fadeHeight}px), transparent)`;
@@ -51,6 +51,14 @@ export function TodoPage() {
     setTitle('');
   };
 
+  const handleDelete = (id: Todo['id']) => {
+    if (editingTodo?.id === id) {
+      cancelEditing();
+    }
+
+    deleteTodo(id);
+  };
+
   const startEditing = (todo: Todo) => {
     setEditingTodo(todo);
     setTitle(todo.title);
@@ -81,6 +89,7 @@ export function TodoPage() {
                   todo={todo}
                   onToggle={toggleTodo}
                   onEdit={() => startEditing(todo)}
+                  onDelete={handleDelete}
                 />
               ))}
             </AdwPreferencesGroup>

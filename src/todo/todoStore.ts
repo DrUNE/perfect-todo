@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
 export type Todo = {
   id: string;
@@ -10,7 +11,33 @@ type TodoState = {
   todoList: Todo[];
 };
 
-export const useTodoList = create<TodoState>(() => ({ todoList: [] }));
+const isTodo = (value: unknown): value is Todo =>
+  typeof value === 'object' &&
+  value !== null &&
+  'id' in value &&
+  typeof value.id === 'string' &&
+  'title' in value &&
+  typeof value.title === 'string' &&
+  'isComplete' in value &&
+  typeof value.isComplete === 'boolean';
+
+export const useTodoList = create<TodoState>()(
+  persist<TodoState>(() => ({ todoList: [] }), {
+    name: 'todo-list',
+    // Данные из localStorage — внешняя граница: принимаем только корректные задачи.
+    merge: (persistedState, currentState) => {
+      const todoList =
+        typeof persistedState === 'object' &&
+        persistedState !== null &&
+        'todoList' in persistedState &&
+        Array.isArray(persistedState.todoList)
+          ? persistedState.todoList.filter(isTodo)
+          : currentState.todoList;
+
+      return { ...currentState, todoList };
+    },
+  }),
+);
 
 const setTodoList = (update: (todoList: Todo[]) => Todo[]) => {
   useTodoList.setState(({ todoList }) => ({ todoList: update(todoList) }));
@@ -47,6 +74,10 @@ export const editTodo = (id: Todo['id'], title: Todo['title']) => {
   );
 
   return true;
+};
+
+export const deleteTodo = (id: Todo['id']) => {
+  setTodoList((todoList) => todoList.filter((todo) => todo.id !== id));
 };
 
 export const clearCompletedTodos = () => {

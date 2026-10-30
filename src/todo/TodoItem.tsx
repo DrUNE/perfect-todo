@@ -5,12 +5,13 @@ type TodoItemProps = {
   todo: Todo;
   onToggle?: (id: Todo['id']) => void;
   onEdit?: () => void;
+  onDelete?: (id: Todo['id']) => void;
 };
 
 const escapeMarkup = (text: string) =>
   text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-export function TodoItem({ todo, onToggle, onEdit }: TodoItemProps) {
+export function TodoItem({ todo, onToggle, onEdit, onDelete }: TodoItemProps) {
   const handleToggled = (isActive: boolean) => {
     if (isActive !== todo.isComplete) {
       onToggle?.(todo.id);
@@ -30,16 +31,27 @@ export function TodoItem({ todo, onToggle, onEdit }: TodoItemProps) {
         />
       }
       suffixWidget={
-        onEdit && (
-          <GtkButton
-            valign="center"
-            className="circular"
-            hasFrame={false}
-            iconName="DocumentEdit"
-            aria-label="Редактировать задачу"
-            onClicked={onEdit}
-          />
-        )
+        todo.isComplete
+          ? onDelete && (
+              <GtkButton
+                valign="center"
+                className="circular"
+                hasFrame={false}
+                iconName="UserTrash"
+                aria-label="Удалить задачу"
+                onClicked={() => onDelete(todo.id)}
+              />
+            )
+          : onEdit && (
+              <GtkButton
+                valign="center"
+                className="circular"
+                hasFrame={false}
+                iconName="DocumentEdit"
+                aria-label="Редактировать задачу"
+                onClicked={onEdit}
+              />
+            )
       }
     />
   );

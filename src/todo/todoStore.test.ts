@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import {
   addTodo,
   clearCompletedTodos,
+  deleteTodo,
   editTodo,
   toggleTodo,
   useTodoList,
@@ -61,6 +62,22 @@ describe('todoStore', () => {
 
     it('does not save an empty title', () => {
       expect(editTodo('todo-1', '   ')).toBe(false);
+      expect(useTodoList.getState().todoList).toEqual(initialTodoList);
+    });
+  });
+
+  describe('deleteTodo', () => {
+    it('removes only the selected todo', () => {
+      deleteTodo('todo-2');
+
+      expect(useTodoList.getState().todoList).toEqual([
+        { id: 'todo-1', title: 'Первая задача', isComplete: false },
+      ]);
+    });
+
+    it('does nothing for an unknown id', () => {
+      deleteTodo('unknown');
+
       expect(useTodoList.getState().todoList).toEqual(initialTodoList);
     });
   });

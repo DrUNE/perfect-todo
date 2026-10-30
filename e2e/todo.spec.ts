@@ -81,3 +81,67 @@ test('does not add a todo with a blank title', async ({ page }) => {
 
   await expect(page.getByRole('button', { name: 'Редактировать задачу' })).toHaveCount(0);
 });
+
+test('shows a trash button instead of the edit button for a completed todo and deletes it', async ({
+  page,
+}) => {
+  await addTodo(page, 'Для удаления');
+  await addTodo(page, 'Остаётся');
+
+  const editButtons = page.getByRole('button', { name: 'Редактировать задачу' });
+  const deleteButton = page.getByRole('button', { name: 'Удалить задачу' });
+
+  await expect(editButtons).toHaveCount(2);
+  await expect(deleteButton).toHaveCount(0);
+
+  await page.getByRole('checkbox', { name: 'Для удаления' }).check();
+
+  await expect(editButtons).toHaveCount(1);
+  await expect(deleteButton).toHaveCount(1);
+
+  await deleteButton.click();
+
+  await expect(page.getByRole('checkbox', { name: 'Для удаления' })).toHaveCount(0);
+  await expect(page.getByRole('checkbox', { name: 'Остаётся' })).toBeVisible();
+  await expect(deleteButton).toHaveCount(0);
+});
+
+test('keeps todos and their status after a page reload', async ({ page }) => {
+  await addTodo(page, 'Сохранённая задача');
+  await addTodo(page, 'Выполненная задача');
+  await page.getByRole('checkbox', { name: 'Выполненная задача' }).check();
+
+  await page.reload();
+
+  await expect(page.getByRole('checkbox', { name: 'Сохранённая задача' })).not.toBeChecked();
+  await expect(page.getByRole('checkbox', { name: 'Выполненная задача' })).toBeChecked();
+
+  await page.getByRole('button', { name: 'Удалить задачу' }).click();
+  await page.reload();
+
+  await expect(page.getByRole('checkbox', { name: 'Выполненная задача' })).toHaveCount(0);
+  await expect(page.getByRole('checkbox', { name: 'Сохранённая задача' })).toBeVisible();
+});
+
+test('ignores corrupted todos in localStorage', async ({ page }) => {
+  await page.evaluate(() => {
+    localStorage.setItem(
+      'todo-list',
+      JSON.stringify({
+        state: {
+          todoList: [
+            { id: 'ok', title: 'Корректная задача', isComplete: false },
+            { id: 1, title: 'Неверный id', isComplete: false },
+            { id: 'no-status', title: 'Без статуса' },
+            null,
+          ],
+        },
+        version: 0,
+      }),
+    );
+  });
+  await page.reload();
+
+  await expect(page.getByRole('checkbox', { name: 'Корректная задача' })).toBeVisible();
+  await expect(page.getByRole('checkbox')).toHaveCount(1);
+});
