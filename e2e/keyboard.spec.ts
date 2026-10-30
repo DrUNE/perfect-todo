@@ -96,6 +96,7 @@ test('Enter edits in place, Enter saves and the focus returns to the row', async
   await expect(editInput).toBeFocused();
   await expect(editInput).toHaveValue('Старое');
 
+  await page.keyboard.press('Control+A');
   await page.keyboard.type('Новое');
   await page.keyboard.press('Enter');
 
@@ -120,6 +121,7 @@ test('Tab out of the edited row saves the title', async ({ page }) => {
   await page.keyboard.press('ArrowDown');
   await page.keyboard.press('Enter');
   await expect(page.getByRole('textbox', { name: 'Название задачи' })).toBeFocused();
+  await page.keyboard.press('Control+A');
   await page.keyboard.type('Стало');
   await page.keyboard.press('Tab');
 

@@ -2,6 +2,7 @@ import { AdwEntryRow } from '@gtk-js/adwaita';
 import { useEffect, useRef, useState, type FocusEvent, type KeyboardEvent } from 'react';
 import { useDeviceInfo } from '@/shared/useDeviceInfo';
 import { RowActions } from './RowActions';
+import styles from './TodoItemEditor.module.css';
 import type { Todo } from './todoStore';
 
 type TodoItemEditorProps = {
@@ -30,7 +31,8 @@ export function TodoItemEditor({ todo, onSave, onCancel }: TodoItemEditorProps) 
       const input = rowRef.current?.querySelector('input');
 
       input?.focus();
-      input?.select();
+      // Курсор в конце текста, без выделения: редактор должен выглядеть как та же строка с курсором.
+      input?.setSelectionRange(input.value.length, input.value.length);
       isArmed.current = true;
     });
 
@@ -68,6 +70,7 @@ export function TodoItemEditor({ todo, onSave, onCancel }: TodoItemEditorProps) 
   return (
     <AdwEntryRow
       ref={rowRef}
+      className={styles.editor}
       data-todo-editor
       title="Название задачи"
       text={title}
