@@ -352,3 +352,34 @@ test('a completed todo is shown in italics with a less contrasting text', async 
   await expect(title).toHaveCSS('text-decoration-line', 'line-through');
   await expect(title).not.toHaveCSS('color', activeColor);
 });
+
+test('the new todo row looks like a list row: same height, no floating label, no edit icon', async ({
+  page,
+}) => {
+  await addTodo(page, 'В списке');
+
+  const input = newTodoInput(page);
+  const newRow = page.locator('.gtk-row.entry').first();
+  const listRowBox = await todoRow(page, 'В списке').boundingBox();
+  const label = newRow.locator('.title');
+
+  expect((await newRow.boundingBox())?.height).toBe(listRowBox?.height);
+  await expect(newRow.locator('.edit-icon')).toBeHidden();
+
+  // Название стоит на месте текста и при фокусе не всплывает мелким заголовком.
+  const labelBefore = await label.boundingBox();
+
+  await input.focus();
+  expect(await label.boundingBox()).toEqual(labelBefore);
+  expect(
+    await label.evaluate((el) => el.ownerDocument.defaultView?.getComputedStyle(el).fontSize),
+  ).toBe(
+    await todoRow(page, 'В списке')
+      .getByText('В списке', { exact: true })
+      .evaluate((el) => el.ownerDocument.defaultView?.getComputedStyle(el).fontSize),
+  );
+
+  // При вводе название пропадает, остаётся только текст.
+  await input.fill('Печатаю');
+  await expect(label).toHaveCSS('opacity', '0');
+});

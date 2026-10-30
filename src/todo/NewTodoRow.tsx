@@ -3,6 +3,7 @@ import { useState, type KeyboardEvent } from 'react';
 import { useDeviceInfo } from '@/shared/useDeviceInfo';
 import { withViewTransition } from '@/shared/withViewTransition';
 import { RowActions } from './RowActions';
+import styles from './NewTodoRow.module.css';
 import { addTodo } from './todoStore';
 
 type NewTodoRowProps = {
@@ -41,6 +42,7 @@ export function NewTodoRow({ onNavigateDown, onAdded }: NewTodoRowProps) {
   return (
     <AdwPreferencesGroup>
       <AdwEntryRow
+        className={title === '' ? styles.row : `${styles.row} ${styles.filled}`}
         title="Новая задача"
         text={title}
         suffixWidget={
