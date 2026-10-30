@@ -1,0 +1,19 @@
+/* На устройствах с мышью кнопки действий видны только при наведении на строку или клавиатурном фокусе
+   в ней. На тач-экранах (hover: none) наведения нет, поэтому кнопки остаются видимыми всегда. */
+@media (hover: hover) {
+  .action {
+    opacity: 0;
+    transition: opacity 150ms ease;
+  }
+
+  .item:hover .action,
+  .item:has(:focus-visible) .action {
+    opacity: 1;
+  }
+}
+
+@media (hover: hover) and (prefers-reduced-motion: reduce) {
+  .action {
+    transition: none;
+  }
+}

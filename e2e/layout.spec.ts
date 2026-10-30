@@ -1,4 +1,8 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
+
+// Ждём окончания анимаций (в том числе View Transition), чтобы измерять итоговое положение элементов.
+const waitForAnimations = (page: Page) =>
+  page.waitForFunction('document.getAnimations().length === 0');
 
 // По умолчанию Playwright скрывает полосы прокрутки, поэтому включаем обычные, чтобы они занимали место.
 test.use({ launchOptions: { ignoreDefaultArgs: ['--hide-scrollbars'] } });
@@ -47,12 +51,16 @@ test('does not shift the input and the list when toolbar buttons appear and disa
 
   const checkbox = page.getByRole('checkbox', { name: 'Задача' });
   const clearButton = page.getByRole('button', { name: 'Удалить завершённые' });
+
+  await waitForAnimations(page);
+
   const inputBox = await input.boundingBox();
   const checkboxBox = await checkbox.boundingBox();
 
   await expect(clearButton).toHaveCount(0);
   await checkbox.check();
   await expect(clearButton).toBeVisible();
+  await waitForAnimations(page);
 
   expect(await input.boundingBox()).toEqual(inputBox);
   expect(await checkbox.boundingBox()).toEqual(checkboxBox);
@@ -62,6 +70,7 @@ test('does not shift the input and the list when toolbar buttons appear and disa
 
   await input.fill('Ещё задача');
   await input.press('Enter');
+  await waitForAnimations(page);
 
   expect(await input.boundingBox()).toEqual(inputBox);
 });

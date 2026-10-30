@@ -1,3 +1,4 @@
+import './withViewTransition.css';
 import { flushSync } from 'react-dom';
 
 const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;

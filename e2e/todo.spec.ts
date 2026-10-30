@@ -158,3 +158,43 @@ test('puts new todos at the top of the list', async ({ page }) => {
   await expect(page.getByRole('checkbox').nth(1)).toHaveAccessibleName('Вторая добавленная');
   await expect(page.getByRole('checkbox').nth(2)).toHaveAccessibleName('Первая добавленная');
 });
+
+test('shows task action buttons only on hover or focus on a device with a mouse', async ({
+  page,
+}) => {
+  await addTodo(page, 'Задача с действиями');
+  await addTodo(page, 'Другая задача');
+
+  const editButtons = page.getByRole('button', { name: 'Редактировать задачу' });
+  const firstEdit = editButtons.nth(1);
+  const otherEdit = editButtons.nth(0);
+
+  await page.mouse.move(0, 0);
+  await expect(firstEdit).toHaveCSS('opacity', '0');
+  await expect(otherEdit).toHaveCSS('opacity', '0');
+
+  await page.getByText('Задача с действиями', { exact: true }).hover();
+  await expect(firstEdit).toHaveCSS('opacity', '1');
+  await expect(otherEdit).toHaveCSS('opacity', '0');
+
+  await page.mouse.move(0, 0);
+  await expect(firstEdit).toHaveCSS('opacity', '0');
+
+  // После нажатия клавиши фокус считается клавиатурным (:focus-visible).
+  await page.keyboard.press('Tab');
+  await firstEdit.focus();
+  await expect(firstEdit).toBeFocused();
+  await expect(firstEdit).toHaveCSS('opacity', '1');
+});
+
+test('shows the delete button of a completed todo only on hover with a mouse', async ({ page }) => {
+  await addTodo(page, 'Готовая задача');
+  await page.getByRole('checkbox', { name: 'Готовая задача' }).check();
+  await page.mouse.move(0, 0);
+
+  const deleteButton = page.getByRole('button', { name: 'Удалить задачу' });
+
+  await expect(deleteButton).toHaveCSS('opacity', '0');
+  await page.getByText('Готовая задача', { exact: true }).hover();
+  await expect(deleteButton).toHaveCSS('opacity', '1');
+});

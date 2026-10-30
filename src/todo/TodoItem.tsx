@@ -1,5 +1,6 @@
 import { AdwActionRow, GtkButton, GtkCheckButton } from '@gtk-js/adwaita';
 import type { Todo } from './todoStore';
+import styles from './TodoItem.module.css';
 
 type TodoItemProps = {
   todo: Todo;
@@ -20,6 +21,7 @@ export function TodoItem({ todo, onToggle, onEdit, onDelete }: TodoItemProps) {
 
   return (
     <AdwActionRow
+      className={styles.item}
       // Имя нужно браузеру, чтобы анимировать появление, удаление и сдвиг этой строки.
       style={{ viewTransitionName: `todo-${todo.id}` }}
       title={todo.isComplete ? `<s>${escapeMarkup(todo.title)}</s>` : todo.title}
@@ -37,7 +39,7 @@ export function TodoItem({ todo, onToggle, onEdit, onDelete }: TodoItemProps) {
           ? onDelete && (
               <GtkButton
                 valign="center"
-                className="circular"
+                className={`circular ${styles.action}`}
                 hasFrame={false}
                 iconName="UserTrash"
                 aria-label="Удалить задачу"
@@ -47,7 +49,7 @@ export function TodoItem({ todo, onToggle, onEdit, onDelete }: TodoItemProps) {
           : onEdit && (
               <GtkButton
                 valign="center"
-                className="circular"
+                className={`circular ${styles.action}`}
                 hasFrame={false}
                 iconName="DocumentEdit"
                 aria-label="Редактировать задачу"

@@ -1,0 +1,11 @@
+/* Анимация View Transition: отключаем общую перекрёстную анимацию страницы, анимируются только именованные элементы. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-group(*) {
+  animation-duration: 250ms;
+  animation-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
+}

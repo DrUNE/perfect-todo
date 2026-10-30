@@ -1,4 +1,9 @@
-/* Reset лежит в отдельном слое: стили без слоя (в том числе Adwaita) всегда его перекрывают. */
+/*
+ * Порядок слоёв: reset → base. Стили без слоя (Adwaita, CSS Modules компонентов) всегда сильнее слоёв.
+ * reset — только сброс браузерных значений по умолчанию; стили приложения — в base.
+ */
+@layer reset, base;
+
 @layer reset {
   *,
   *::before,
@@ -11,16 +16,11 @@
   }
 
   html {
-    scrollbar-gutter: stable; /* место под полосу прокрутки резервируется, страница не прыгает при её появлении */
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
   }
 
   body {
-    min-height: 100dvh;
-    background-color: var(--window-bg-color);
-    color: var(--window-fg-color);
-    overflow-x: hidden; /* заголовок Adwaita выходит за край окна на 1px (margin -1px) */
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
   }
@@ -57,27 +57,29 @@
     padding: 0;
     list-style: none;
   }
+}
+
+/* Глобальные стили приложения: тема страницы, скролл и корневой контейнер. */
+@layer base {
+  html {
+    scrollbar-gutter: stable; /* место под полосу прокрутки резервируется, страница не прыгает при её появлении */
+  }
+
+  body {
+    min-height: 100dvh;
+    background-color: var(--window-bg-color);
+    color: var(--window-fg-color);
+    overflow-x: hidden; /* заголовок Adwaita выходит за край окна на 1px (margin -1px) */
+  }
 
   #root {
     isolation: isolate;
   }
-}
 
-/* Раскладной экран в режиме двух половин: контент держим в первой, чтобы он не попадал на сгиб. */
-@media (horizontal-viewport-segments: 2) {
-  #root {
-    width: env(viewport-segment-width 0 0);
+  /* Раскладной экран в режиме двух половин: контент держим в первой, чтобы он не попадал на сгиб. */
+  @media (horizontal-viewport-segments: 2) {
+    #root {
+      width: env(viewport-segment-width 0 0);
+    }
   }
-}
-
-/* Анимация появления, удаления и сдвига задач (View Transitions API, см. withViewTransition). */
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation: none;
-  mix-blend-mode: normal;
-}
-
-::view-transition-group(*) {
-  animation-duration: 250ms;
-  animation-timing-function: cubic-bezier(0.25, 0.1, 0.25, 1);
 }

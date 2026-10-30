@@ -167,3 +167,25 @@ test.describe('toolbar space on a touch device', () => {
     expect(await input.boundingBox()).toEqual(initialBox);
   });
 });
+
+test.describe('task action buttons on a touch device', () => {
+  test.use({ viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true });
+
+  test('are always visible without hover', async ({ page }) => {
+    await page.goto('/');
+
+    const input = page.getByRole('textbox', { name: 'Название задачи' });
+
+    await input.fill('Задача');
+    await input.press('Enter');
+
+    await expect(page.getByRole('button', { name: 'Редактировать задачу' })).toHaveCSS(
+      'opacity',
+      '1',
+    );
+
+    await page.getByRole('checkbox', { name: 'Задача' }).tap();
+
+    await expect(page.getByRole('button', { name: 'Удалить задачу' })).toHaveCSS('opacity', '1');
+  });
+});

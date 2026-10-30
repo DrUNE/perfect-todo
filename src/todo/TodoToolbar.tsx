@@ -1,6 +1,7 @@
 import { GtkBox, GtkButton } from '@gtk-js/adwaita';
 import { useDeviceInfo } from '@/shared/useDeviceInfo';
 import { ClearCompletedButton } from './ClearCompletedButton';
+import styles from './TodoToolbar.module.css';
 import { useTodoList } from './todoStore';
 
 type TodoToolbarProps = {
@@ -11,10 +12,6 @@ type TodoToolbarProps = {
   onCancel: () => void;
 };
 
-// Высота круглой иконки-кнопки Adwaita (34px): место под панель резервируется всегда,
-// чтобы появление и исчезновение кнопок не сдвигало поле ввода и список.
-const toolbarHeight = 34;
-
 // Панель иконок-действий над полем ввода: слева действия над списком, справа подтверждение и отмена
 // ввода на устройствах с тач-экраном (там нет Esc).
 export function TodoToolbar({ isInputActive, canConfirm, onConfirm, onCancel }: TodoToolbarProps) {
@@ -23,10 +20,10 @@ export function TodoToolbar({ isInputActive, canConfirm, onConfirm, onCancel }: 
   const showInputActions = hasTouch && isInputActive;
 
   return (
-    <GtkBox spacing={8} style={{ height: toolbarHeight, marginBottom: 8 }}>
+    <GtkBox spacing={8} className={styles.toolbar}>
       {hasCompletedTodos && <ClearCompletedButton />}
       {showInputActions && (
-        <GtkBox spacing={8} style={{ marginLeft: 'auto' }}>
+        <GtkBox spacing={8} className={styles.inputActions}>
           <GtkButton
             className="circular"
             iconName="WindowClose"

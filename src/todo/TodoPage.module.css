@@ -1,0 +1,47 @@
+.content {
+  padding: 0 16px 16px;
+}
+
+/* Закреплённая полоса с панелью и полем ввода. Её нижние --fade-height — отступ перед списком, в котором
+   прокручиваемый список плавно уходит в прозрачность и размытие, а не обрезается резко.
+   Полоса шире списка на отступ контейнера, чтобы тень списка не просвечивала по бокам. */
+.stickyBar {
+  --fade-height: 24px;
+
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  margin: 0 -16px;
+  padding: 16px 16px var(--fade-height);
+}
+
+.fade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    var(--window-bg-color) calc(100% - var(--fade-height)),
+    transparent
+  );
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    black calc(100% - var(--fade-height)),
+    transparent
+  );
+  mask-image: linear-gradient(to bottom, black calc(100% - var(--fade-height)), transparent);
+}
+
+.stickyContent {
+  position: relative;
+}
+
+/* Имена для View Transition: браузер анимирует сдвиг этих блоков (см. shared/withViewTransition). */
+.input {
+  view-transition-name: todo-input;
+}
+
+.list {
+  view-transition-name: todo-list;
+}
