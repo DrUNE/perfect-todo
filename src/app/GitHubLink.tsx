@@ -1,7 +1,10 @@
+import { cx } from '@/shared/cx';
+import styles from './GitHubLink.module.css';
+
 export function GitHubLink() {
   return (
     <a
-      className="gtk-button circular image-button"
+      className={cx('gtk-button', 'circular', 'image-button', styles.link)}
       href="https://github.com/DrUNE/perfect-todo"
       target="_blank"
       rel="noopener noreferrer"

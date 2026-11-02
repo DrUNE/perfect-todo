@@ -12,6 +12,19 @@ test('opens the GitHub repository in a new tab', async ({ page, context }) => {
   await expect(githubLink).toHaveAttribute('href', 'https://github.com/DrUNE/perfect-todo');
   await expect(githubLink).toHaveAttribute('rel', 'noopener noreferrer');
 
+  const centerOffset = await githubLink.evaluate((link) => {
+    const linkBox = link.getBoundingClientRect();
+    const iconBox = link.querySelector('svg').getBoundingClientRect();
+
+    return {
+      x: iconBox.x + iconBox.width / 2 - linkBox.x - linkBox.width / 2,
+      y: iconBox.y + iconBox.height / 2 - linkBox.y - linkBox.height / 2,
+    };
+  });
+
+  expect(Math.abs(centerOffset.x)).toBeLessThanOrEqual(0.5);
+  expect(Math.abs(centerOffset.y)).toBeLessThanOrEqual(0.5);
+
   const newPagePromise = context.waitForEvent('page');
   await githubLink.click();
   const githubPage = await newPagePromise;
