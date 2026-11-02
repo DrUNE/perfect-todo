@@ -4,6 +4,22 @@ import { markDone, newTodoInput, todoRow, waitForAnimations } from './helpers.js
 // По умолчанию Playwright скрывает полосы прокрутки, поэтому включаем обычные, чтобы они занимали место.
 test.use({ launchOptions: { ignoreDefaultArgs: ['--hide-scrollbars'] } });
 
+test('opens the GitHub repository in a new tab', async ({ page, context }) => {
+  await page.goto('/');
+
+  const githubLink = page.getByRole('link', { name: 'Открыть репозиторий на GitHub' });
+
+  await expect(githubLink).toHaveAttribute('href', 'https://github.com/DrUNE/perfect-todo');
+  await expect(githubLink).toHaveAttribute('rel', 'noopener noreferrer');
+
+  const newPagePromise = context.waitForEvent('page');
+  await githubLink.click();
+  const githubPage = await newPagePromise;
+
+  await expect(githubPage).toHaveURL('https://github.com/DrUNE/perfect-todo');
+  await githubPage.close();
+});
+
 test('scrolls the whole page and keeps only the input stuck to the top', async ({ page }) => {
   await page.goto('/');
 
