@@ -7,6 +7,7 @@ import { useResolvedTheme } from '@/theme/themeStore';
 import { ShortcutsHelp } from '@/todo/ShortcutsHelp';
 import { TodoPage } from '@/todo/TodoPage';
 import styles from './App.module.css';
+import { GitHubLink } from './GitHubLink';
 
 export function App() {
   const resolvedTheme = useResolvedTheme();
@@ -35,7 +36,12 @@ export function App() {
         showEndTitleButtons={false}
         showTitle={false}
         start={<ShortcutsHelp />}
-        end={<ThemeSwitcher />}
+        end={
+          <>
+            <GitHubLink />
+            <ThemeSwitcher />
+          </>
+        }
       />
       <TodoPage />
     </AdwaitaProvider>
